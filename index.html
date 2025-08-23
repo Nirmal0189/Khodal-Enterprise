@@ -1060,23 +1060,7 @@
       margin-bottom: 24px;
     }
     
-    /* Mobile menu */
-    .mobile-menu-btn {
-      display: none;
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: var(--text);
-      font-size: 20px;
-      cursor: pointer;
-      padding: 12px;
-      border-radius: 12px;
-      transition: var(--transition);
-    }
     
-    .mobile-menu-btn:hover {
-      background: rgba(255, 255, 255, 0.15);
-      border-color: rgba(255, 255, 255, 0.3);
-    }
     
     /* Responsive design */
     @media (max-width: 1024px) {
@@ -1129,9 +1113,7 @@
         padding: 14px 16px;
       }
       
-      .mobile-menu-btn {
-        display: block;
-      }
+     
       
       /* Mobile-specific card improvements for 2-column layout */
       .card {
@@ -2437,13 +2419,11 @@
       <div style="display: flex; align-items: center; gap: 15px;">
         <span class="muted" id="userEmail"></span>
         <button class="btn bad" id="logoutBtn">
-          <i class="fas fa-sign-out-alt"></i> Logout
+          <i class="fas fa-sign-out-alt"></i> 
         </button>
       </div>
       
-      <button class="mobile-menu-btn">
-        <i class="fas fa-bars"></i>
-      </button>
+      
     </header>
     
     <!-- Loading indicator -->
