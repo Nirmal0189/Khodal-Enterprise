@@ -1,26 +1,35 @@
 <!DOCTYPE html>
-<html lang="gu">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Khodal Enterprize</title>
+  <title>Khodal Enterprise - Inventory Management</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
   <style>
     :root {
-      --bg: #0f172a;
-      --panel: #111827;
-      --muted: #1f2937;
-      --card: #0b1220;
-      --text: #e5e7eb;
-      --sub: #9ca3af;
-      --brand: #22d3ee;
-      --accent: #a78bfa;
-      --good: #34d399;
+      --bg: #0a0f1a;
+      --panel: #0f172a;
+      --muted: #1e293b;
+      --card: #0f172a;
+      --text: #f1f5f9;
+      --sub: #94a3b8;
+      --brand: #06b6d4;
+      --accent: #8b5cf6;
+      --good: #10b981;
       --warn: #f59e0b;
-      --bad: #f87171;
-      --shadow: 0 10px 30px rgba(0,0,0,.35);
-      --radius: 18px;
-      --transition: all 0.3s ease;
+      --bad: #ef4444;
+      --shadow: 0 20px 40px rgba(0,0,0,0.4);
+      --shadow-lg: 0 25px 50px rgba(0,0,0,0.5);
+      --radius: 16px;
+      --radius-lg: 24px;
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      --gradient: linear-gradient(135deg, var(--brand), var(--accent));
+      --gradient-subtle: linear-gradient(135deg, rgba(6, 182, 212, 0.1), rgba(139, 92, 246, 0.1));
     }
     
     * {
@@ -35,11 +44,12 @@
     }
     
     body {
-      background: linear-gradient(120deg, var(--bg), #0b1220 40%, #0a1224);
+      background: linear-gradient(135deg, var(--bg) 0%, #0f172a 50%, #1e293b 100%);
       color: var(--text);
       font-size: 15px;
-      line-height: 1.6;
+      line-height: 1.7;
       overflow-x: hidden;
+      font-weight: 400;
     }
     
     a {
@@ -47,25 +57,366 @@
       text-decoration: none;
     }
     
-    /* Layout */
-    .app {
+    /* Login Page Styles */
+    .login-container {
+      min-height: 100vh;
       display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: linear-gradient(135deg, var(--bg) 0%, #0f172a 50%, #1e293b 100%);
+      position: relative;
+    }
+    
+    .login-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(34,211,238,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+      opacity: 0.3;
+    }
+    
+    .login-card {
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(25px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: var(--radius-lg);
+      padding: 48px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: var(--shadow-lg);
+      animation: fadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
+    }
+    
+    .login-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--gradient);
+    }
+    
+    .login-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at 20% 80%, rgba(34, 211, 238, 0.1) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 20%, rgba(167, 139, 250, 0.1) 0%, transparent 50%);
+      pointer-events: none;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .login-logo {
+      text-align: center;
+      margin-bottom: 35px;
+      position: relative;
+      z-index: 2;
+    }
+    
+    .login-logo img {
+      width: 90px;
+      height: 90px;
+      border-radius: 20px;
+      object-fit: cover;
+      margin-bottom: 20px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+      border: 2px solid rgba(34, 211, 238, 0.2);
+      transition: var(--transition);
+    }
+    
+    .login-logo img:hover {
+      transform: scale(1.05);
+      border-color: rgba(34, 211, 238, 0.4);
+    }
+    
+    .login-logo h1 {
+      font-size: 28px;
+      margin-bottom: 8px;
+      color: var(--text);
+      font-weight: 700;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .login-logo p {
+      color: var(--sub);
+      font-size: 16px;
+      font-weight: 500;
+    }
+    
+    .login-form .control {
+      margin-bottom: 24px;
+      position: relative;
+      z-index: 2;
+    }
+    
+    .login-form label {
+      display: block;
+      margin-bottom: 10px;
+      color: var(--sub);
+      font-weight: 600;
+      font-size: 14px;
+      transition: var(--transition);
+    }
+    
+    .login-form .control:focus-within label {
+      color: var(--brand);
+    }
+    
+    .password-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    
+    .password-container input {
+      flex: 1;
+      padding-right: 50px;
+    }
+    
+    .toggle-password {
+      position: absolute;
+      right: 12px;
+      background: none;
+      border: none;
+      color: var(--sub);
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 6px;
+      transition: var(--transition);
+    }
+    
+    .toggle-password:hover {
+      color: var(--brand);
+      background: rgba(34, 211, 238, 0.1);
+    }
+    
+    .login-form input {
+      width: 100%;
+      padding: 18px 20px;
+      background: rgba(15, 23, 42, 0.8);
+      border: 2px solid rgba(255, 255, 255, 0.12);
+      border-radius: 16px;
+      color: var(--text);
+      font-size: 16px;
+      transition: var(--transition);
+      font-weight: 500;
+      backdrop-filter: blur(10px);
+    }
+    
+    .login-form input:focus {
+      border-color: var(--brand);
+      box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.25);
+      outline: none;
+      background: rgba(15, 23, 42, 0.9);
+      transform: translateY(-2px);
+    }
+    
+    .login-form input::placeholder {
+      color: var(--sub);
+      opacity: 0.7;
+    }
+    
+    /* Password strength indicators */
+    .login-form input[style*="border-color: var(--good)"] {
+      border-color: var(--good) !important;
+      box-shadow: 0 0 0 2px rgba(52, 211, 153, 0.2);
+    }
+    
+    .login-form input[style*="border-color: var(--bad)"] {
+      border-color: var(--bad) !important;
+      box-shadow: 0 0 0 2px rgba(248, 113, 113, 0.2);
+    }
+    
+    .login-btn {
+      width: 100%;
+      padding: 18px 24px;
+      background: var(--gradient);
+      border: none;
+      border-radius: 16px;
+      color: white;
+      font-weight: 700;
+      font-size: 16px;
+      cursor: pointer;
+      transition: var(--transition);
+      margin-top: 20px;
+      position: relative;
+      overflow: hidden;
+      z-index: 2;
+      box-shadow: 0 8px 25px rgba(6, 182, 212, 0.3);
+    }
+    
+    .login-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s;
+    }
+    
+    .login-btn:hover::before {
+      left: 100%;
+    }
+    
+    .login-btn:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 35px rgba(6, 182, 212, 0.5);
+    }
+    
+    .login-btn:active {
+      transform: translateY(-1px);
+    }
+    
+    .login-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .login-links {
+      text-align: center;
+      margin-top: 25px;
+      font-size: 15px;
+      color: var(--sub);
+      position: relative;
+      z-index: 2;
+    }
+    
+    .login-links a {
+      color: var(--brand);
+      font-weight: 600;
+      transition: var(--transition);
+      padding: 4px 8px;
+      border-radius: 6px;
+    }
+    
+    .login-links a:hover {
+      background: rgba(34, 211, 238, 0.1);
+      color: var(--text);
+    }
+    
+    .login-error {
+      background: rgba(248, 113, 113, 0.15);
+      border: 1px solid rgba(248, 113, 113, 0.4);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 25px;
+      color: var(--bad);
+      font-size: 14px;
+      display: none;
+      animation: shake 0.5s ease;
+      position: relative;
+      z-index: 2;
+    }
+    
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+    
+    .login-error i {
+      margin-right: 8px;
+      color: var(--bad);
+    }
+    
+    .loading {
+      position: relative;
+      pointer-events: none;
+    }
+    
+    .loading::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 20px;
+      height: 20px;
+      margin: -10px 0 0 -10px;
+      border: 2px solid transparent;
+      border-top: 2px solid currentColor;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    /* Loading indicator for main app */
+    .loading-indicator {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 20px;
+      text-align: center;
+      color: var(--sub);
+      background: rgba(17, 24, 39, 0.8);
+      border-radius: var(--radius);
+      margin: 20px;
+    }
+    
+    .loading-spinner {
+      width: 50px;
+      height: 50px;
+      border: 3px solid rgba(34, 211, 238, 0.2);
+      border-top: 3px solid var(--brand);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+    
+    .loading-indicator p {
+      font-size: 16px;
+      font-weight: 500;
+      margin: 0;
+    }
+    
+    /* App Styles */
+    .app {
+      display: none; /* Hidden until login */
       flex-direction: column;
       min-height: 100vh;
     }
     
-    /* Header */
+    .app.show {
+      display: flex !important;
+    }
+    
     .header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 16px 20px;
-      background: rgba(17, 24, 39, 0.9);
-      backdrop-filter: blur(8px);
-      border-bottom: 1px solid #1f2937;
+      padding: 20px 28px;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
       position: sticky;
       top: 0;
       z-index: 100;
+      box-shadow: var(--shadow);
     }
     
     .brand {
@@ -75,29 +426,41 @@
     }
     
     .logo {
-      width: 40px;
-      height: 40px;
-      border-radius: 12px;
-      
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
       box-shadow: var(--shadow);
       display: flex;
       align-items: center;
       justify-content: center;
       color: white;
       font-size: 18px;
+      overflow: hidden;
+      transition: var(--transition);
+      border: 2px solid rgba(255, 255, 255, 0.1);
     }
+    
+    .logo:hover {
+      transform: scale(1.05);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+    
     .logo img {
       max-width: 110%;
       max-height: 100%;
       border-radius: 12px;
       object-fit: cover;
-      
     }
     
     .brand-text h1 {
-      font-size: 18px;
+      font-size: 20px;
       margin: 0;
-      font-weight: 700;
+      font-weight: 800;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.025em;
     }
     
     .muted {
@@ -122,17 +485,18 @@
     
     /* Panel and controls */
     .panel {
-      background: black;
-      border: 1px solid gray;
-      border-radius: var(--radius);
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(30, 41, 59, 0.9));
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: var(--radius-lg);
       box-shadow: var(--shadow);
-      padding: 16px;
-      margin-bottom: 20px;
+      padding: 24px;
+      margin-bottom: 24px;
+      backdrop-filter: blur(15px);
     }
     
     .controls {
       display: grid;
-      gap: 16px;
+      gap: 20px;
     }
     
     .control {
@@ -144,57 +508,74 @@
       font-size: 13px;
       color: var(--sub);
       font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    label i {
+      color: var(--brand);
     }
     
     input, select, button, textarea {
-      background: #0b1324;
-      border: 1px solid #1f2937;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.12);
       color: var(--text);
-      padding: 12px 14px;
-      border-radius: 12px;
+      padding: 14px 16px;
+      border-radius: 14px;
       outline: none;
       font-family: inherit;
       font-size: 14px;
       transition: var(--transition);
+      backdrop-filter: blur(10px);
     }
     
     input:focus, select:focus, textarea:focus {
       border-color: var(--brand);
-      box-shadow: 0 0 0 3px rgba(34,211,238,.15);
+      box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.2);
+      background: rgba(15, 23, 42, 0.9);
+      transform: translateY(-1px);
     }
     
     /* Buttons */
     button {
       cursor: pointer;
-      border: 1px solid #21324a;
+      border: 1px solid rgba(255, 255, 255, 0.1);
       display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
       font-weight: 500;
       transition: var(--transition);
+      position: relative;
+      overflow: hidden;
     }
     
     .btn {
-      padding: 12px 16px;
-      border-radius: 12px;
-      background: linear-gradient(180deg, #0f1a2e, #0a1425);
-      border: 1px solid #1e2a43;
+      padding: 14px 18px;
+      border-radius: 14px;
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.9), rgba(30, 41, 59, 0.9));
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      font-weight: 600;
+      letter-spacing: 0.025em;
     }
     
     .btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 25px rgba(0,0,0,0.3);
+      border-color: rgba(255, 255, 255, 0.2);
     }
     
     .btn.primary {
-      background: linear-gradient(180deg, #0d2b36, #0b1f2a);
-      border-color: #1f3d4a;
+      background: linear-gradient(180deg, rgba(34, 211, 238, 0.2), rgba(34, 211, 238, 0.1));
+      border-color: rgba(34, 211, 238, 0.3);
     }
     
     .btn.brand {
-      background: linear-gradient(180deg, rgba(34,211,238,.2), rgba(167,139,250,.15));
-      border: 1px solid rgba(34,211,238,.5);
+      background: var(--gradient);
+      border: 1px solid rgba(6, 182, 212, 0.5);
+      color: white;
+      box-shadow: 0 8px 25px rgba(6, 182, 212, 0.3);
     }
     
     .btn.warn {
@@ -222,11 +603,25 @@
     /* Topbar and search */
     .topbar {
       display: flex;
-      gap: 16px;
+      gap: 20px;
       flex-wrap: wrap;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 24px;
+      margin-bottom: 28px;
+      padding: 24px;
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(30, 41, 59, 0.9));
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(15px);
+    }
+    
+    .topbar h2 {
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-size: 24px;
+      font-weight: 700;
     }
     
     .searchbar {
@@ -239,6 +634,11 @@
       position: relative;
       flex: 1;
       min-width: 240px;
+      transition: var(--transition);
+    }
+    
+    .search-wrapper:focus-within {
+      transform: scale(1.02);
     }
     
     .search-wrapper i {
@@ -265,16 +665,30 @@
     }
     
     .stat {
-      padding: 16px;
-      border-radius: 16px;
-      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
-      border: 1px solid #1f2937;
+      padding: 24px;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(30, 41, 59, 0.9));
+      border: 1px solid rgba(255, 255, 255, 0.12);
       transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(15px);
+    }
+    
+    .stat::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--gradient);
     }
     
     .stat:hover {
-      transform: translateY(-3px);
-      box-shadow: var(--shadow);
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+      border-color: rgba(255, 255, 255, 0.2);
     }
     
     .stat h3 {
@@ -282,6 +696,13 @@
       font-size: 14px;
       color: var(--sub);
       font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .stat h3 i {
+      color: var(--brand);
     }
     
     .stat .v {
@@ -290,33 +711,77 @@
       color: var(--brand);
     }
     
-    /* Grid and cards - IMPROVED FOR MOBILE */
+    /* Grid and cards */
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 20px;
     }
     
+    /* Responsive grid system */
+    @media (max-width: 1200px) {
+      .grid {
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 18px;
+      }
+    }
+    
+    @media (max-width: 1024px) {
+      .grid {
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 16px;
+      }
+    }
+    
     .card {
-      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
-      border: 1px solid #1f2937;
-      border-radius: 18px;
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(30, 41, 59, 0.9));
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: var(--radius-lg);
       overflow: hidden;
       display: flex;
       flex-direction: column;
       transition: var(--transition);
       position: relative;
+      backdrop-filter: blur(15px);
+    }
+    
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--gradient);
+      opacity: 0;
+      transition: var(--transition);
+    }
+    
+    .card:hover::before {
+      opacity: 1;
     }
     
     .card:hover {
-      transform: translateY(-5px);
-      box-shadow: var(--shadow);
-      border-color: rgba(34,211,238,.3);
+      transform: translateY(-6px);
+      box-shadow: var(--shadow-lg);
+      border-color: rgba(6, 182, 212, 0.4);
+    }
+    
+    /* Mobile card optimizations */
+    @media (max-width: 768px) {
+      .card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow);
+      }
+      
+      .card .thumb img:hover {
+        transform: scale(1.02);
+      }
     }
     
     .thumb {
       aspect-ratio: 1/1;
-      background: #0c1426;
+      background: linear-gradient(135deg, #0c1426, #0a0f1a);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -381,15 +846,24 @@
     
     .chip {
       font-size: 12px;
-      color: #cbd5e1;
-      background: #0a1222;
-      border: 1px solid #1f2937;
-      padding: 4px 10px;
+      color: #e2e8f0;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      padding: 6px 12px;
       border-radius: 999px;
       display: inline-flex;
       align-items: center;
-      gap: 4px;
+      gap: 6px;
       white-space: nowrap;
+      font-weight: 500;
+      backdrop-filter: blur(10px);
+      transition: var(--transition);
+    }
+    
+    .chip:hover {
+      background: rgba(30, 41, 59, 0.9);
+      border-color: rgba(255, 255, 255, 0.25);
+      transform: translateY(-1px);
     }
     
     .footer {
@@ -410,9 +884,12 @@
     /* Table view */
     .table-container {
       overflow-x: auto;
-      border-radius: 16px;
-      margin: 20px 0;
+      border-radius: var(--radius-lg);
+      margin: 24px 0;
       -webkit-overflow-scrolling: touch;
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(30, 41, 59, 0.9));
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(15px);
     }
     
     table {
@@ -441,30 +918,33 @@
       background: rgba(11, 19, 36, 0.95);
       backdrop-filter: blur(8px);
       padding: 16px;
-      border-bottom: 1px solid #1f2937;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
     
     tbody tr {
-      background: #0b1324;
-      border: 1px solid #1f2937;
+      background: rgba(11, 19, 36, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.05);
       transition: var(--transition);
     }
     
     tbody tr:hover {
-      background: rgba(17, 24, 39, 0.6);
+      background: rgba(15, 23, 42, 0.9);
+      border-color: rgba(255, 255, 255, 0.15);
+      transform: scale(1.01);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
     }
     
     tbody td {
-      border-top: 1px solid #1f2937;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
     }
     
     tbody td:first-child {
-      border-left: 1px solid #1f2937;
+      border-left: 1px solid rgba(255, 255, 255, 0.05);
       border-radius: 10px 0 0 10px;
     }
     
     tbody td:last-child {
-      border-right: 1px solid #1f2937;
+      border-right: 1px solid rgba(255, 255, 255, 0.05);
       border-radius: 0 10px 10px 0;
     }
     
@@ -472,24 +952,25 @@
     .modal-backdrop {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,.7);
+      background: rgba(0,0,0,.8);
       display: none;
       align-items: center;
       justify-content: center;
       padding: 20px;
       z-index: 1000;
-      backdrop-filter: blur(5px);
+      backdrop-filter: blur(10px);
     }
     
     .modal {
       width: min(920px, 96vw);
       max-height: 90vh;
       overflow: auto;
-      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.03));
-      border: 1px solid #1f2937;
-      border-radius: 20px;
-      box-shadow: var(--shadow);
-      animation: modalFadeIn 0.3s ease;
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.95));
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      animation: modalFadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      backdrop-filter: blur(25px);
     }
     
     @keyframes modalFadeIn {
@@ -502,11 +983,11 @@
       align-items: center;
       justify-content: space-between;
       padding: 16px 20px;
-      border-bottom: 1px solid #1f2937;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
       position: sticky;
       top: 0;
-      background: rgba(15,23,42,.95);
-      backdrop-filter: blur(6px);
+      background: rgba(17, 24, 39, 0.95);
+      backdrop-filter: blur(10px);
       z-index: 5;
     }
     
@@ -516,40 +997,45 @@
     
     /* Empty state */
     .empty {
-      padding: 40px 24px;
+      padding: 48px 28px;
       color: var(--sub);
       text-align: center;
-      border: 1px dashed #334155;
-      border-radius: 16px;
+      border: 2px dashed rgba(255, 255, 255, 0.15);
+      border-radius: var(--radius-lg);
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 16px;
+      gap: 20px;
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.6), rgba(30, 41, 59, 0.6));
+      backdrop-filter: blur(15px);
     }
     
     .empty i {
       font-size: 48px;
       opacity: 0.5;
+      color: var(--brand);
     }
     
     /* Toast notifications */
     .toast {
       position: fixed;
-      bottom: 20px;
-      right: 20px;
-      padding: 12px 20px;
-      background: var(--panel);
-      border: 1px solid #1f2937;
-      border-radius: 12px;
-      box-shadow: var(--shadow);
+      bottom: 24px;
+      right: 24px;
+      padding: 18px 28px;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 14px;
       z-index: 1000;
       transform: translateY(100px);
       opacity: 0;
-      transition: all 0.3s ease;
+      transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
       max-width: 90vw;
+      font-weight: 600;
     }
     
     .toast.show {
@@ -577,23 +1063,64 @@
     /* Mobile menu */
     .mobile-menu-btn {
       display: none;
-      background: none;
-      border: none;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
       color: var(--text);
-      font-size: 24px;
+      font-size: 20px;
       cursor: pointer;
+      padding: 12px;
+      border-radius: 12px;
+      transition: var(--transition);
     }
     
-    /* Responsive design - IMPROVED MOBILE STYLING */
+    .mobile-menu-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+    
+    /* Responsive design */
     @media (max-width: 1024px) {
       .grid {
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        grid-template-columns: repeat(4, 1fr);
+        gap: 18px;
+      }
+    }
+    
+    /* Login page responsive */
+    @media (max-width: 480px) {
+      .login-card {
+        padding: 30px 20px;
+        margin: 10px;
+      }
+      
+      .login-logo img {
+        width: 70px;
+        height: 70px;
+      }
+      
+      .login-logo h1 {
+        font-size: 24px;
+      }
+      
+      .login-logo p {
+        font-size: 14px;
+      }
+      
+      .login-form input {
+        padding: 14px;
+        font-size: 16px; /* Prevents zoom on iOS */
+      }
+      
+      .login-btn {
+        padding: 14px;
+        font-size: 16px;
       }
     }
     
     @media (max-width: 900px) {
       .grid {
-        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
       }
     }
     
@@ -604,6 +1131,60 @@
       
       .mobile-menu-btn {
         display: block;
+      }
+      
+      /* Mobile-specific card improvements for 2-column layout */
+      .card {
+        margin-bottom: 0;
+      }
+      
+      .card-body {
+        padding: 12px;
+      }
+      
+      .title {
+        font-size: 14px;
+        height: 2.6em;
+        line-height: 1.3;
+      }
+      
+      .sub {
+        font-size: 12px;
+        margin-bottom: 8px;
+        line-height: 1.4;
+      }
+      
+      .chip {
+        font-size: 10px;
+        padding: 4px 8px;
+        margin-bottom: 4px;
+      }
+      
+      .footer {
+        justify-content: space-between;
+        gap: 4px;
+        margin-top: 8px;
+      }
+      
+      .footer .btn {
+        flex: 0 0 auto;
+        width: 36px;
+        height: 36px;
+        padding: 0;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 36px;
+      }
+      
+      .footer .btn span {
+        display: none;
+      }
+      
+      .footer .btn i {
+        margin: 0;
+        font-size: 14px;
       }
       
       .content {
@@ -630,10 +1211,9 @@
         grid-template-columns: 1fr 1fr;
       }
       
-      /* MOBILE GRID: Show 2 cards on smaller screens */
       .grid {
         grid-template-columns: repeat(2, 1fr);
-        gap: 16px;
+        gap: 12px;
       }
       
       .modal {
@@ -645,65 +1225,14 @@
       .modal .body {
         padding: 16px;
       }
-      
-      /* Improved mobile card styling */
-      .card {
-        margin-bottom: 0;
-      }
-      
-      .footer {
-        justify-content: space-between;
-        gap: 4px;
-      }
-      
-      .footer .btn {
-        flex: 0 0 auto;
-        width: 36px;
-        height: 36px;
-        padding: 0;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-      
-      .footer .btn span {
-        display: none;
-      }
-      
-      .footer .btn i {
-        margin: 0;
-        font-size: 14px;
-      }
-      
-      /* Make card content more compact for mobile */
-      .card-body {
-        padding: 12px;
-      }
-      
-      .title {
-        font-size: 14px;
-        height: 2.6em;
-      }
-      
-      .sub {
-        font-size: 12px;
-        margin-bottom: 8px;
-      }
-      
-      .chip {
-        font-size: 10px;
-        padding: 3px 6px;
-      }
     }
     
     @media (max-width: 640px) {
-      /* MOBILE GRID: Show 2 cards on medium-small screens */
       .grid {
         grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
       }
       
-      /* Adjust stats for smaller screens */
       .stats {
         grid-template-columns: 1fr;
         gap: 12px;
@@ -738,13 +1267,11 @@
         text-align: center;
       }
       
-      /* MOBILE GRID: Show 2 cards on very small screens */
       .grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
       }
       
-      /* Improved modal for mobile */
       .modal .body {
         padding: 12px;
       }
@@ -753,7 +1280,6 @@
         padding: 12px 16px;
       }
       
-      /* Improved form controls for mobile */
       .control {
         width: 100%;
       }
@@ -762,7 +1288,6 @@
         gap: 12px;
       }
       
-      /* Card adjustments for very small screens */
       .footer .btn {
         width: 32px;
         height: 32px;
@@ -774,12 +1299,11 @@
     }
     
     @media (max-width: 360px) {
-      /* MOBILE GRID: Show 2 cards on smallest screens */
       .grid {
         grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
       }
       
-      /* Adjust card footer for smallest screens */
       .footer {
         gap: 3px;
       }
@@ -799,25 +1323,20 @@
       }
     }
     
-    /* Additional mobile improvements */
     @media (max-width: 768px) {
-      /* Improve touch targets for mobile */
       button, .btn, input[type="button"], input[type="submit"] {
         min-height: 44px;
       }
       
-      /* Improve form elements for mobile */
       input, select, textarea {
-        font-size: 16px; /* Prevents zoom on iOS */
+        font-size: 16px;
       }
       
-      /* Better table responsiveness */
       .table-container {
-        border: 1px solid #1f2937;
+        border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 12px;
       }
       
-      /* Card hover effects disabled on touch devices */
       @media (hover: none) {
         .card:hover {
           transform: none;
@@ -852,37 +1371,1108 @@
     .mb-1 { margin-bottom: 8px; }
     .mb-2 { margin-bottom: 16px; }
     .mb-3 { margin-bottom: 24px; }
+    
+    /* Enhanced animations */
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    @keyframes fadeInScale {
+      from {
+        opacity: 0;
+        transform: scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+    
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+    
+    .animate-slide-in {
+      animation: slideInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+    
+    .animate-fade-in-scale {
+      animation: fadeInScale 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+    
+    .shimmer {
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      background-size: 200% 100%;
+      animation: shimmer 2s infinite;
+    }
+    
+    /* Enhanced focus states */
+    .btn:focus,
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.3);
+    }
+    
+    /* Enhanced hover effects */
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* Glass morphism effects */
+    .glass {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    /* Enhanced shadows */
+    .shadow-lg {
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    }
+    
+    .shadow-xl {
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+    }
+    
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: var(--brand);
+      border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--accent);
+    }
+    
+    /* Selection styles */
+    ::selection {
+      background: rgba(34, 211, 238, 0.3);
+      color: var(--text);
+    }
+    
+    /* Focus visible for accessibility */
+    .btn:focus-visible,
+    input:focus-visible,
+    select:focus-visible {
+      outline: 2px solid var(--brand);
+      outline-offset: 3px;
+      border-radius: 4px;
+    }
+    
+    /* Enhanced button states */
+    .btn:active {
+      transform: translateY(-1px);
+      transition: all 0.1s ease;
+    }
+    
+    /* Loading state for buttons */
+    .btn.loading {
+      position: relative;
+      color: transparent;
+    }
+    
+    .btn.loading::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 16px;
+      height: 16px;
+      margin: -8px 0 0 -8px;
+      border: 2px solid transparent;
+      border-top: 2px solid currentColor;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    /* Detail Layout */
+    .detail-layout {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+    
+    .detail-info-panel {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 20px;
+      backdrop-filter: blur(15px);
+    }
+    
+    .detail-history-panel {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 20px;
+      backdrop-filter: blur(15px);
+    }
+    
+    .info-item {
+      color: var(--sub);
+      font-size: 14px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .info-item i {
+      color: var(--brand);
+      width: 16px;
+    }
+    
+    .detail-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+    
+    .detail-actions .btn {
+      flex: 1;
+      min-width: 120px;
+    }
+    
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    
+    .history-header h3 {
+      margin: 0;
+      font-size: 18px;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .history-header h3 i {
+      color: var(--brand);
+    }
+    
+    /* Purchase History Table */
+    .purchase-history-table {
+      width: 100%;
+      border-radius: 12px;
+      overflow: hidden;
+      background: rgba(15, 23, 42, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .purchase-header {
+      display: grid;
+      grid-template-columns: 1fr 80px 1fr 80px;
+      gap: 12px;
+      padding: 12px 16px;
+      background: rgba(15, 23, 42, 0.8);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      font-weight: 600;
+      color: var(--sub);
+      font-size: 13px;
+    }
+    
+    .purchase-row {
+      display: grid;
+      grid-template-columns: 1fr 80px 1fr 80px;
+      gap: 12px;
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      transition: var(--transition);
+    }
+    
+    .purchase-row:hover {
+      background: rgba(30, 41, 59, 0.3);
+    }
+    
+    .purchase-row:last-child {
+      border-bottom: none;
+    }
+    
+    .purchase-col {
+      display: flex;
+      align-items: center;
+      font-size: 14px;
+      word-break: break-word;
+    }
+    
+    .purchase-col:first-child {
+      font-weight: 600;
+      color: var(--brand);
+    }
+    
+    .purchase-col:nth-child(2) {
+      justify-content: center;
+      font-weight: 600;
+    }
+    
+    .purchase-col:nth-child(3) {
+      color: var(--sub);
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    
+    .purchase-col:last-child {
+      justify-content: center;
+    }
+    
+    /* Mobile Responsive Improvements */
+    @media (max-width: 768px) {
+      .detail-layout {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+      
+      .detail-info-panel,
+      .detail-history-panel {
+        padding: 16px;
+      }
+      
+      .detail-actions {
+        flex-direction: column;
+        gap: 10px;
+      }
+      
+      .detail-actions .btn {
+        min-width: auto;
+      }
+      
+      .history-header {
+        flex-direction: column;
+        gap: 12px;
+        align-items: stretch;
+      }
+      
+      .history-header .btn {
+        width: 100%;
+        justify-content: center;
+      }
+      
+      .purchase-header,
+      .purchase-row {
+        grid-template-columns: 1fr 60px 1fr 60px;
+        gap: 8px;
+        padding: 10px 12px;
+      }
+      
+      .purchase-col {
+        font-size: 13px;
+      }
+      
+      .purchase-col:nth-child(3) {
+        max-width: 120px;
+      }
+      
+      .modal .body {
+        padding: 16px;
+      }
+      
+      .row.wrap {
+        flex-direction: column;
+        gap: 16px;
+      }
+      
+      .control {
+        width: 100%;
+        min-width: auto !important;
+      }
+      
+      .panel {
+        padding: 20px;
+        margin-bottom: 20px;
+      }
+      
+      .topbar {
+        padding: 20px;
+        margin-bottom: 24px;
+      }
+      
+      .stats {
+        gap: 16px;
+        margin: 16px 0;
+      }
+      
+      .stat {
+        padding: 20px;
+      }
+      
+      .grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+      }
+      
+      .card {
+        margin-bottom: 0;
+      }
+      
+      .footer {
+        gap: 6px;
+      }
+      
+      .footer .btn {
+        width: 40px;
+        height: 40px;
+        font-size: 12px;
+      }
+      
+      .btn {
+        padding: 12px 16px;
+        font-size: 14px;
+      }
+      
+      .btn-sm {
+        padding: 8px 10px;
+        font-size: 12px;
+      }
+      
+      .search-wrapper {
+        min-width: 100%;
+      }
+      
+      .searchbar {
+        width: 100%;
+        gap: 10px;
+        flex-direction: column;
+      }
+      
+      .searchbar .btn {
+        flex: 1;
+        min-width: auto;
+      }
+      
+      .controls {
+        gap: 16px;
+      }
+      
+      .control {
+        gap: 6px;
+      }
+      
+      label {
+        font-size: 12px;
+      }
+      
+      input, select, textarea {
+        padding: 12px 14px;
+        font-size: 16px;
+      }
+    }
+    
+    @media (max-width: 640px) {
+      .detail-layout {
+        gap: 16px;
+      }
+      
+      .detail-info-panel,
+      .detail-history-panel {
+        padding: 14px;
+      }
+      
+      .info-item {
+        font-size: 13px;
+        margin-bottom: 10px;
+      }
+      
+      .history-header h3 {
+        font-size: 16px;
+      }
+      
+      .purchase-header,
+      .purchase-row {
+        grid-template-columns: 1fr 50px 1fr 50px;
+        gap: 6px;
+        padding: 8px 10px;
+      }
+      
+      .purchase-col {
+        font-size: 12px;
+      }
+      
+      .purchase-col:nth-child(3) {
+        max-width: 100px;
+      }
+      
+      .header {
+        padding: 16px 20px;
+      }
+      
+      .content {
+        padding: 16px 20px;
+      }
+      
+      .panel {
+        padding: 16px;
+        margin-bottom: 16px;
+      }
+      
+      .topbar {
+        padding: 16px;
+        margin-bottom: 20px;
+      }
+      
+      .stats {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+      
+      .stat {
+        padding: 16px;
+      }
+      
+      .stat .v {
+        font-size: 20px;
+      }
+      
+      .grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+      }
+      
+      .card-body {
+        padding: 12px;
+      }
+      
+      .title {
+        font-size: 14px;
+        height: 2.6em;
+      }
+      
+      .sub {
+        font-size: 12px;
+        margin-bottom: 8px;
+      }
+      
+      .chip {
+        font-size: 10px;
+        padding: 4px 8px;
+      }
+      
+      .footer .btn {
+        width: 36px;
+        height: 36px;
+        font-size: 11px;
+      }
+      
+      .modal {
+        width: 95vw;
+        max-height: 90vh;
+        margin: 10px;
+      }
+      
+      .modal .body {
+        padding: 12px;
+      }
+      
+      .modal header {
+        padding: 12px 16px;
+      }
+      
+      .btn {
+        padding: 10px 14px;
+        font-size: 13px;
+      }
+      
+      .btn-sm {
+        padding: 6px 8px;
+        font-size: 11px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .detail-layout {
+        gap: 14px;
+      }
+      
+      .detail-info-panel,
+      .detail-history-panel {
+        padding: 12px;
+      }
+      
+      .info-item {
+        font-size: 12px;
+        margin-bottom: 8px;
+      }
+      
+      .detail-actions {
+        gap: 8px;
+      }
+      
+      .history-header h3 {
+        font-size: 15px;
+      }
+      
+      .purchase-header,
+      .purchase-row {
+        grid-template-columns: 1fr 40px 1fr 40px;
+        gap: 4px;
+        padding: 6px 8px;
+      }
+      
+      .purchase-col {
+        font-size: 11px;
+      }
+      
+      .purchase-col:nth-child(3) {
+        max-width: 80px;
+      }
+      
+      .header {
+        padding: 14px 16px;
+      }
+      
+      .content {
+        padding: 14px 16px;
+      }
+      
+      .panel {
+        padding: 14px;
+        margin-bottom: 14px;
+      }
+      
+      .topbar {
+        padding: 14px;
+        margin-bottom: 18px;
+      }
+      
+      .topbar h2 {
+        font-size: 20px;
+      }
+      
+      .grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+      }
+      
+      .card {
+        margin-bottom: 0;
+      }
+      
+      .footer {
+        gap: 4px;
+      }
+      
+      .footer .btn {
+        width: 32px;
+        height: 32px;
+        font-size: 10px;
+      }
+      
+      .btn {
+        padding: 8px 12px;
+        font-size: 12px;
+      }
+      
+      .btn-sm {
+        padding: 4px 6px;
+        font-size: 10px;
+      }
+      
+      .searchbar {
+        flex-direction: column;
+        gap: 8px;
+      }
+      
+      .searchbar .btn {
+        width: 100%;
+        justify-content: center;
+      }
+      
+      .controls {
+        gap: 12px;
+      }
+      
+      .control {
+        gap: 4px;
+      }
+      
+      label {
+        font-size: 11px;
+      }
+      
+      input, select, textarea {
+        padding: 10px 12px;
+        font-size: 16px;
+      }
+      
+      .modal {
+        width: 98vw;
+        max-height: 95vh;
+        margin: 5px;
+      }
+      
+      .modal .body {
+        padding: 10px;
+      }
+      
+      .modal header {
+        padding: 10px 14px;
+      }
+      
+      .login-card {
+        padding: 30px 20px;
+        margin: 10px;
+      }
+      
+      .login-logo img {
+        width: 70px;
+        height: 70px;
+      }
+      
+      .login-logo h1 {
+        font-size: 24px;
+      }
+      
+      .login-logo p {
+        font-size: 14px;
+      }
+      
+      .login-form input {
+        padding: 14px;
+        font-size: 16px;
+      }
+      
+      .login-btn {
+        padding: 14px;
+        font-size: 16px;
+      }
+    }
+    
+    @media (max-width: 360px) {
+      .detail-layout {
+        gap: 12px;
+      }
+      
+      .detail-info-panel,
+      .detail-history-panel {
+        padding: 10px;
+      }
+      
+      .info-item {
+        font-size: 11px;
+        margin-bottom: 6px;
+      }
+      
+      .detail-actions {
+        gap: 6px;
+      }
+      
+      .history-header h3 {
+        font-size: 14px;
+      }
+      
+      .purchase-header,
+      .purchase-row {
+        grid-template-columns: 1fr 35px 1fr 35px;
+        gap: 3px;
+        padding: 5px 6px;
+      }
+      
+      .purchase-col {
+        font-size: 10px;
+      }
+      
+      .purchase-col:nth-child(3) {
+        max-width: 70px;
+      }
+      
+      .header {
+        padding: 12px 14px;
+      }
+      
+      .content {
+        padding: 12px 14px;
+      }
+      
+      .panel {
+        padding: 12px;
+        margin-bottom: 12px;
+      }
+      
+      .topbar {
+        padding: 12px;
+        margin-bottom: 16px;
+      }
+      
+      .topbar h2 {
+        font-size: 18px;
+      }
+      
+      .grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 6px;
+      }
+      
+      .footer .btn {
+        width: 28px;
+        height: 28px;
+        font-size: 9px;
+      }
+      
+      .btn {
+        padding: 6px 10px;
+        font-size: 11px;
+      }
+      
+      .btn-sm {
+        padding: 3px 5px;
+        font-size: 9px;
+      }
+      
+      .searchbar {
+        gap: 6px;
+      }
+      
+      .controls {
+        gap: 10px;
+      }
+      
+      .control {
+        gap: 3px;
+      }
+      
+      label {
+        font-size: 10px;
+      }
+      
+      input, select, textarea {
+        padding: 8px 10px;
+        font-size: 16px;
+      }
+      
+      .modal {
+        width: 99vw;
+        max-height: 98vh;
+        margin: 2px;
+      }
+      
+      .modal .body {
+        padding: 8px;
+      }
+      
+      .modal header {
+        padding: 8px 12px;
+      }
+    }
+    
+    /* Touch-friendly improvements */
+    @media (hover: none) and (pointer: coarse) {
+      .btn, .chip, .card, .stat {
+        min-height: 44px;
+      }
+      
+      .footer .btn {
+        min-height: 44px;
+        min-width: 44px;
+      }
+      
+      .purchase-col:last-child .btn {
+        min-height: 36px;
+        min-width: 36px;
+      }
+      
+      .search-wrapper input {
+        min-height: 44px;
+      }
+      
+      .modal-backdrop {
+        padding: 10px;
+      }
+      
+      .modal {
+        max-height: 95vh;
+      }
+    }
+    
+    /* Mobile-specific optimizations for 2-column layout */
+    @media (max-width: 480px) {
+      .card {
+        min-height: auto;
+        touch-action: manipulation;
+      }
+      
+      .thumb {
+        aspect-ratio: 1/1;
+        min-height: 120px;
+        touch-action: manipulation;
+      }
+      
+      .title {
+        font-size: 13px;
+        height: 2.4em;
+        line-height: 1.2;
+      }
+      
+      .sub {
+        font-size: 11px;
+        margin-bottom: 6px;
+        line-height: 1.3;
+      }
+      
+      .chip {
+        font-size: 9px;
+        padding: 3px 6px;
+        margin-bottom: 3px;
+      }
+      
+      .footer {
+        gap: 3px;
+        margin-top: 6px;
+      }
+      
+      .footer .btn {
+        width: 32px;
+        height: 32px;
+        min-height: 32px;
+        min-width: 32px;
+        touch-action: manipulation;
+      }
+      
+      .footer .btn i {
+        font-size: 12px;
+      }
+    }
+    
+    @media (max-width: 360px) {
+      .card-body {
+        padding: 10px;
+      }
+      
+      .title {
+        font-size: 12px;
+        height: 2.2em;
+      }
+      
+      .sub {
+        font-size: 10px;
+        margin-bottom: 5px;
+      }
+      
+      .chip {
+        font-size: 8px;
+        padding: 2px 5px;
+        margin-bottom: 2px;
+      }
+      
+      .footer {
+        gap: 2px;
+        margin-top: 5px;
+      }
+      
+      .footer .btn {
+        width: 28px;
+        height: 28px;
+        min-height: 28px;
+        min-width: 28px;
+        touch-action: manipulation;
+      }
+      
+      .footer .btn i {
+        font-size: 11px;
+      }
+      
+      /* Ensure 2-column layout works on very small screens */
+      .grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 6px;
+      }
+      
+      .card {
+        touch-action: manipulation;
+      }
+    }
   </style>
 </head>
 <body>
-  <div class="app">
+  <!-- Login Page -->
+  <div class="login-container" id="loginPage">
+    <div class="login-card">
+      <div class="login-logo">
+        <img src="KHODAL.png" alt="Khodal Enterprise">
+        <h1>Khodal Enterprise</h1>
+        <p>Inventory Management System</p>
+      </div>
+      
+      <div class="login-error hidden" id="loginError">
+        <i class="fas fa-exclamation-circle"></i>
+        <span id="errorMessage"></span>
+      </div>
+      
+      <form class="login-form" id="loginForm">
+        <div class="control">
+          <label for="email">
+            <i class="fas fa-envelope"></i>
+            Email Address
+          </label>
+          <input type="email" id="email" placeholder="your@email.com" required>
+        </div>
+        
+        <div class="control">
+          <label for="password">
+            <i class="fas fa-lock"></i>
+            Password
+          </label>
+          <div class="password-container">
+            <input type="password" id="password" placeholder="Enter your password" required>
+            <button type="button" class="toggle-password" id="togglePassword">
+              <i class="fas fa-eye"></i>
+            </button>
+          </div>
+        </div>
+        
+        <button type="submit" class="login-btn">
+          <i class="fas fa-lock-open"></i> Sign In
+        </button>
+      </form>
+      
+      <div class="login-links">
+        <p>Don't have an account? <a href="#" id="showRegister">Create Account</a></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Register Page -->
+  <div class="login-container hidden" id="registerPage">
+    <div class="login-card">
+      <div class="login-logo">
+        <img src="KHODAL.png" alt="Khodal Enterprise">
+        <h1>Create Account</h1>
+        <p>Join Khodal Enterprise</p>
+      </div>
+      
+      <div class="login-error hidden" id="registerError">
+        <i class="fas fa-exclamation-circle"></i>
+        <span id="registerErrorMessage"></span>
+      </div>
+      
+      <form class="login-form" id="registerForm">
+        <div class="control">
+          <label for="regEmail">
+            <i class="fas fa-envelope"></i>
+            Email Address
+          </label>
+          <input type="email" id="regEmail" placeholder="your@email.com" required>
+        </div>
+        
+        <div class="control">
+          <label for="regPassword">
+            <i class="fas fa-lock"></i>
+            Password
+          </label>
+          <div class="password-container">
+            <input type="password" id="regPassword" placeholder="Create a password" minlength="6" required>
+            <button type="button" class="toggle-password" id="toggleRegPassword">
+              <i class="fas fa-eye"></i>
+            </button>
+          </div>
+        </div>
+        
+        <div class="control">
+          <label for="regPasswordConfirm">
+            <i class="fas fa-check-circle"></i>
+            Confirm Password
+          </label>
+          <div class="password-container">
+            <input type="password" id="regPasswordConfirm" placeholder="Confirm your password" required>
+            <button type="button" class="toggle-password" id="toggleRegPasswordConfirm">
+              <i class="fas fa-eye"></i>
+            </button>
+          </div>
+        </div>
+        
+        <button type="submit" class="login-btn">
+          <i class="fas fa-user-plus"></i> Create Account
+        </button>
+      </form>
+      
+      <div class="login-links">
+        <p>Already have an account? <a href="#" id="showLogin">Sign In</a></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main App -->
+  <div class="app" id="app">
     <header class="header">
       <div class="brand">
-        <div class="logo"><i><img src="KHODAL.png" alt="" srcset=""></i></div>
+        <div class="logo">
+          <img src="KHODAL.png" alt="Khodal Enterprise">
+        </div>
         <div class="brand-text">
           <h1>Khodal Enterprise</h1>
-          <div class="muted">KHODAL ENTERPRISE</div>
+          <div class="muted">Inventory Management System</div>
         </div>
       </div>
+      
+      <div style="display: flex; align-items: center; gap: 15px;">
+        <span class="muted" id="userEmail"></span>
+        <button class="btn bad" id="logoutBtn">
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
+      </div>
+      
       <button class="mobile-menu-btn">
         <i class="fas fa-bars"></i>
       </button>
     </header>
+    
+    <!-- Loading indicator -->
+    <div id="loadingIndicator" class="loading-indicator hidden">
+      <div class="loading-spinner"></div>
+      <p>Loading your inventory...</p>
+    </div>
 
     <div class="main-container">
       <main class="content">
         <div class="controls-section">
           <div class="panel controls">
             <div class="control">
-              <label for="q">Search (નામ / SKU / supplier)</label>
+              <label for="q">
+                <i class="fas fa-search"></i>
+                Search Products
+              </label>
               <div class="search-wrapper">
                 <i class="fas fa-search"></i>
-                <input id="q" type="search" placeholder="Search products..." />
+                <input id="q" type="search" placeholder="Search by name, SKU, or supplier..." />
               </div>
             </div>
+            
             <div class="row">
               <div class="control" style="flex:1">
-                <label for="sortBy">Sort</label>
+                <label for="sortBy">
+                  <i class="fas fa-sort"></i>
+                  Sort By
+                </label>
                 <select id="sortBy">
                   <option value="name">Name (A–Z)</option>
                   <option value="recent">Recently Purchased</option>
@@ -891,13 +2481,17 @@
                 </select>
               </div>
               <div class="control" style="width:130px">
-                <label for="viewMode">View</label>
+                <label for="viewMode">
+                  <i class="fas fa-th-large"></i>
+                  View Mode
+                </label>
                 <select id="viewMode">
-                  <option value="grid">Grid</option>
-                  <option value="table">Table</option>
+                  <option value="grid">Grid View</option>
+                  <option value="table">Table View</option>
                 </select>
               </div>
             </div>
+            
             <div class="row wrap">
               <button class="btn brand" id="addItemBtn">
                 <i class="fas fa-plus"></i>
@@ -920,14 +2514,16 @@
                 <span>Reset</span>
               </button>
             </div>
+            
             <p class="muted" style="font-size:12px;margin:8px 0 0">
-              <i class="fas fa-lightbulb"></i> Tip: ફોટા upload localStorage માં સેવે છે. 200 items માટે OK, પણ જો બહુ મોટા ફોટા હોય તો Export JSON backup રાખજો.
+              <i class="fas fa-lightbulb"></i> 
+              Tip: Photos are saved in the cloud. 200 items is fine, but for larger photos, keep a JSON backup.
             </p>
           </div>
         </div>
 
         <div class="topbar">
-          <h2 style="margin:0">તમારા Products</h2>
+          <h2>Your Products</h2>
           <div class="searchbar">
             <button class="btn brand" id="quickPurchaseBtn">
               <i class="fas fa-bolt"></i>
@@ -936,6 +2532,10 @@
             <button class="btn" id="statsBtn">
               <i class="fas fa-chart-bar"></i>
               <span>View Stats</span>
+            </button>
+            <button class="btn warn" id="testFirebaseBtn">
+              <i class="fas fa-bug"></i>
+              <span>Test Firebase</span>
             </button>
           </div>
         </div>
@@ -946,11 +2546,11 @@
             <div class="v" id="statProducts">0</div>
           </div>
           <div class="stat">
-            <h3><i class="fas fa-layer-group"></i> Total Qty Purchased</h3>
+            <h3><i class="fas fa-layer-group"></i> Total Quantity</h3>
             <div class="v" id="statQty">0</div>
           </div>
           <div class="stat">
-            <h3><i class="fas fa-calendar-alt"></i> Last Purchase Date</h3>
+            <h3><i class="fas fa-calendar-alt"></i> Last Purchase</h3>
             <div class="v" id="statLast">–</div>
           </div>
           <div class="stat">
@@ -997,7 +2597,9 @@
   <div class="modal-backdrop" id="itemModalWrap">
     <div class="modal">
       <header>
-        <strong id="itemModalTitle"><i class="fas fa-cube"></i> Add Item</strong>
+        <strong id="itemModalTitle">
+          <i class="fas fa-cube"></i> Add Item
+        </strong>
         <button class="btn" onclick="closeItemModal()">
           <i class="fas fa-times"></i> Close
         </button>
@@ -1006,7 +2608,7 @@
         <div class="row wrap">
           <div class="control" style="flex:1;min-width:220px">
             <label><i class="fas fa-tag"></i> Item Name</label>
-            <input id="f_name" placeholder="ઉદાહરણ: SS Bowl 12cm" />
+            <input id="f_name" placeholder="Example: SS Bowl 12cm" />
           </div>
           <div class="control" style="width:180px">
             <label><i class="fas fa-barcode"></i> SKU / Code</label>
@@ -1031,7 +2633,7 @@
             <input id="f_openQty" type="number" min="0" value="0" />
           </div>
           <div class="control" style="width:180px">
-            <label><i class="fas fa-balance-scale"></i> Unit (pcs/kg)</label>
+            <label><i class="fas fa-balance-scale"></i> Unit</label>
             <input id="f_unit" placeholder="pcs" value="pcs" />
           </div>
           <div class="control" style="flex:1;min-width:240px">
@@ -1056,7 +2658,9 @@
   <div class="modal-backdrop" id="detailModalWrap">
     <div class="modal">
       <header>
-        <strong id="detailTitle"><i class="fas fa-info-circle"></i> Item Details</strong>
+        <strong id="detailTitle">
+          <i class="fas fa-info-circle"></i> Item Details
+        </strong>
         <button class="btn" onclick="closeDetail()">
           <i class="fas fa-times"></i> Close
         </button>
@@ -1089,8 +2693,8 @@
             <input id="p_date" type="date" />
           </div>
           <div class="control" style="width:180px">
-            <label><i class="fas fa-sticky-note"></i> Price/Notes (optional)</label>
-            <input id="p_note" placeholder="₹ / note" />
+            <label><i class="fas fa-sticky-note"></i> Notes</label>
+            <input id="p_note" placeholder="Optional notes" />
           </div>
         </div>
         <div class="row wrap" style="margin-top:10px">
@@ -1110,56 +2714,566 @@
   </div>
 
   <script>
-    /*** Simple localStorage DB ***/
-    const DB_KEY = 'ss_inv_v1';
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyBU2QzQUSnL1xHACRziKBKgHaBqaFN5mwk",
+      authDomain: "khodal-enterprise-1b07d.firebaseapp.com",
+      projectId: "khodal-enterprise-1b07d",
+      storageBucket: "khodal-enterprise-1b07d.firebasestorage.app",
+      messagingSenderId: "905787790243",
+      appId: "1:905787790243:web:2c6696bdf26244a6950016",
+      measurementId: "G-DTGLD2ZJP0"
+    };
+    
+    // Initialize Firebase
+    try {
+      firebase.initializeApp(firebaseConfig);
+      console.log('✅ Firebase initialized successfully');
+    } catch (error) {
+      console.error('❌ Firebase initialization error:', error);
+    }
+    
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    const storage = firebase.storage();
+    
+    // Authentication state observer
+    auth.onAuthStateChanged(async (user) => {
+      console.log('🔄 Auth state changed:', user ? 'User signed in' : 'User signed out');
+      
+      if (user) {
+        // User is signed in
+        console.log('✅ User signed in:', user.email);
+        console.log('🆔 User UID:', user.uid);
+        
+        try {
+          // Update user's last login time
+          await db.collection('users').doc(user.uid).update({
+            lastLogin: new Date()
+          });
+          console.log('✅ User profile updated');
+        } catch (error) {
+          console.log('⚠️ User profile not found, creating new one');
+          try {
+            await db.collection('users').doc(user.uid).set({
+              email: user.email,
+              createdAt: new Date(),
+              lastLogin: new Date()
+            });
+            console.log('✅ New user profile created');
+          } catch (profileError) {
+            console.error('❌ Failed to create user profile:', profileError);
+          }
+        }
+        
+        // Wait for DOM to be ready before showing app
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', () => {
+            console.log('🔄 DOM ready, showing app...');
+            showApp();
+            loadData();
+          });
+        } else {
+          // DOM is already ready
+          console.log('🔄 DOM ready, showing app...');
+          showApp();
+          loadData();
+        }
+        
+      } else {
+        // User is signed out
+        console.log('👋 User signed out');
+        showLogin();
+      }
+    });
+    
+    // UI Elements for login/register
+    const loginPage = document.getElementById('loginPage');
+    const registerPage = document.getElementById('registerPage');
+    const app = document.getElementById('app');
+    const loginForm = document.getElementById('loginForm');
+    const registerForm = document.getElementById('registerForm');
+    const showRegisterLink = document.getElementById('showRegister');
+    const showLoginLink = document.getElementById('showLogin');
+    const loginError = document.getElementById('loginError');
+    const errorMessage = document.getElementById('errorMessage');
+    const registerError = document.getElementById('registerError');
+    const registerErrorMessage = document.getElementById('registerErrorMessage');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const userEmail = document.getElementById('userEmail');
+    
+    // Show/hide functions for auth UI
+    function showLogin() {
+      loginPage.classList.remove('hidden');
+      registerPage.classList.add('hidden');
+      app.classList.remove('show');
+    }
+    
+    function showRegister() {
+      loginPage.classList.add('hidden');
+      registerPage.classList.remove('hidden');
+      app.classList.remove('show');
+    }
+    
+    function showApp() {
+      loginPage.classList.add('hidden');
+      registerPage.classList.add('hidden');
+      app.classList.add('show');
+      userEmail.textContent = auth.currentUser.email;
+      
+      // Initialize DOM elements if not already done
+      if (!listEl) {
+        initializeDOMElements();
+      }
+      
+      // Show loading indicator initially
+      const loadingIndicator = document.getElementById('loadingIndicator');
+      if (loadingIndicator) {
+        loadingIndicator.classList.remove('hidden');
+      }
+      
+      console.log('✅ Dashboard displayed successfully');
+    }
+    
+    // Login form submission
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const submitBtn = loginForm.querySelector('.login-btn');
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      
+      // Basic validation
+      if (!email || !password) {
+        showLoginError('Please fill in all fields');
+        return;
+      }
+      
+      if (!email.includes('@')) {
+        showLoginError('Please enter a valid email address');
+        return;
+      }
+      
+      // Show loading state
+      submitBtn.disabled = true;
+      submitBtn.classList.add('loading');
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing In...';
+      
+      try {
+        await auth.signInWithEmailAndPassword(email, password);
+        hideLoginError();
+        showToast('Login successful!', 'success');
+      } catch (error) {
+        console.error('Login error:', error);
+        let errorMsg = 'Login failed. Please try again.';
+        
+        switch (error.code) {
+          case 'auth/user-not-found':
+            errorMsg = 'No account found with this email address.';
+            break;
+          case 'auth/wrong-password':
+            errorMsg = 'Incorrect password. Please try again.';
+            break;
+          case 'auth/invalid-email':
+            errorMsg = 'Invalid email address format.';
+            break;
+          case 'auth/too-many-requests':
+            errorMsg = 'Too many failed attempts. Please try again later.';
+            break;
+          case 'auth/user-disabled':
+            errorMsg = 'This account has been disabled.';
+            break;
+        }
+        
+        showLoginError(errorMsg);
+      } finally {
+        // Reset button state
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('loading');
+        submitBtn.innerHTML = '<i class="fas fa-lock-open"></i> Sign In';
+      }
+    });
+    
+    // Register form submission
+    registerForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const submitBtn = registerForm.querySelector('.login-btn');
+      const email = document.getElementById('regEmail').value.trim();
+      const password = document.getElementById('regPassword').value;
+      const confirmPassword = document.getElementById('regPasswordConfirm').value;
+      
+      // Validation
+      if (!email || !password || !confirmPassword) {
+        showRegisterError('Please fill in all fields');
+        return;
+      }
+      
+      if (!email.includes('@')) {
+        showRegisterError('Please enter a valid email address');
+        return;
+      }
+      
+      if (password.length < 6) {
+        showRegisterError('Password must be at least 6 characters long');
+        return;
+      }
+      
+      if (password !== confirmPassword) {
+        showRegisterError('Passwords do not match');
+        return;
+      }
+      
+      // Show loading state
+      submitBtn.disabled = true;
+      submitBtn.classList.add('loading');
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
+      
+      try {
+        await auth.createUserWithEmailAndPassword(email, password);
+        hideRegisterError();
+        showToast('Account created successfully!', 'success');
+        
+        // Create user profile in Firestore
+        const user = auth.currentUser;
+        if (user) {
+          await db.collection('users').doc(user.uid).set({
+            email: user.email,
+            createdAt: new Date(),
+            lastLogin: new Date()
+          });
+        }
+      } catch (error) {
+        console.error('Registration error:', error);
+        let errorMsg = 'Registration failed. Please try again.';
+        
+        switch (error.code) {
+          case 'auth/email-already-in-use':
+            errorMsg = 'An account with this email already exists.';
+            break;
+          case 'auth/invalid-email':
+            errorMsg = 'Invalid email address format.';
+            break;
+          case 'auth/weak-password':
+            errorMsg = 'Password is too weak. Please choose a stronger password.';
+            break;
+          case 'auth/operation-not-allowed':
+            errorMsg = 'Registration is currently disabled.';
+            break;
+        }
+        
+        showRegisterError(errorMsg);
+      } finally {
+        // Reset button state
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('loading');
+        submitBtn.innerHTML = '<i class="fas fa-user-plus"></i> Create Account';
+      }
+    });
+    
+    // Helper functions for showing/hiding errors
+    function showLoginError(message) {
+      errorMessage.textContent = message;
+      loginError.style.display = 'block';
+      loginError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    
+    function hideLoginError() {
+      loginError.style.display = 'none';
+    }
+    
+    function showRegisterError(message) {
+      registerErrorMessage.textContent = message;
+      registerError.style.display = 'block';
+      registerError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    
+    function hideRegisterError() {
+      registerError.style.display = 'none';
+    }
+    
+    // Navigation between login and register
+    showRegisterLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      showRegister();
+    });
+    
+    showLoginLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      showLogin();
+    });
+    
+    // Logout functionality
+    logoutBtn.addEventListener('click', async () => {
+      try {
+        logoutBtn.disabled = true;
+        logoutBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing Out...';
+        
+        await auth.signOut();
+        showToast('Logged out successfully', 'success');
+        showLogin();
+      } catch (error) {
+        console.error('Logout error:', error);
+        showToast('Error during logout', 'error');
+      } finally {
+        logoutBtn.disabled = false;
+        logoutBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> Logout';
+      }
+    });
+    
+    // Password toggle functionality
+    document.querySelectorAll('.toggle-password').forEach(button => {
+      button.addEventListener('click', function() {
+        const input = this.previousElementSibling;
+        const icon = this.querySelector('i');
+        if (input.type === 'password') {
+          input.type = 'text';
+          icon.classList.remove('fa-eye');
+          icon.classList.add('fa-eye-slash');
+          icon.title = 'Hide password';
+        } else {
+          input.type = 'password';
+          icon.classList.remove('fa-eye-slash');
+          icon.classList.add('fa-eye');
+          icon.title = 'Show password';
+        }
+      });
+    });
+    
+    // Cloud Database Functions
     const uid = () => Math.random().toString(36).slice(2)+Date.now().toString(36);
     const todayStr = ()=> new Date().toISOString().slice(0,10);
     const fmtDate = (d)=> new Date(d).toLocaleDateString('en-IN',{year:'numeric',month:'short',day:'2-digit'});
-
-    const load = () => JSON.parse(localStorage.getItem(DB_KEY)||'{"items":[],"purchases":[]}');
-    const save = (data) => localStorage.setItem(DB_KEY, JSON.stringify(data));
-
-    let state = load();
-
-    // Elements
-    const listEl = document.getElementById('list');
-    const tableWrap = document.getElementById('tableWrap');
-    const tableBody = document.getElementById('tableBody');
-    const statProducts = document.getElementById('statProducts');
-    const statQty = document.getElementById('statQty');
-    const statLast = document.getElementById('statLast');
-    const statSuppliers = document.getElementById('statSuppliers');
-    const emptyState = document.getElementById('emptyState');
-
-    // Search & Sort
-    const q = document.getElementById('q');
-    const sortBy = document.getElementById('sortBy');
-    const viewMode = document.getElementById('viewMode');
-
-    // Modals
-    const itemModalWrap = document.getElementById('itemModalWrap');
-    const itemModalTitle = document.getElementById('itemModalTitle');
-    const f_name = document.getElementById('f_name');
-    const f_sku = document.getElementById('f_sku');
-    const f_supplier = document.getElementById('f_supplier');
-    const f_category = document.getElementById('f_category');
-    const f_openQty = document.getElementById('f_openQty');
-    const f_unit = document.getElementById('f_unit');
-    const f_photo = document.getElementById('f_photo');
+    
+    let state = {items: [], purchases: []};
+    
+    // Load data from Firestore
+    async function loadData() {
+      if (!auth.currentUser) {
+        console.error('No authenticated user');
+        return;
+      }
+      
+      const userId = auth.currentUser.uid;
+      console.log('Loading data for user:', userId);
+      
+      try {
+        showToast('Loading your data...', 'warning');
+        
+        // Check if user document exists first
+        const userDoc = await db.collection('users').doc(userId).get();
+        if (!userDoc.exists) {
+          console.log('Creating new user profile...');
+          await db.collection('users').doc(userId).set({
+            email: auth.currentUser.email,
+            createdAt: new Date(),
+            lastLogin: new Date()
+          });
+        }
+        
+        // Load items
+        console.log('Loading items...');
+        const itemsSnapshot = await db.collection('users').doc(userId).collection('items').get();
+        state.items = [];
+        itemsSnapshot.forEach((doc) => {
+          state.items.push({id: doc.id, ...doc.data()});
+        });
+        console.log('Loaded items:', state.items.length);
+        
+        // Load purchases
+        console.log('Loading purchases...');
+        const purchasesSnapshot = await db.collection('users').doc(userId).collection('purchases').get();
+        state.purchases = [];
+        purchasesSnapshot.forEach((doc) => {
+          state.purchases.push({id: doc.id, ...doc.data()});
+        });
+        console.log('Loaded purchases:', state.purchases.length);
+        
+        // Ensure DOM elements are ready before rendering
+        if (!listEl || !tableWrap || !tableBody || !emptyState) {
+          console.log('🔄 DOM elements not ready, initializing...');
+          initializeDOMElements();
+        }
+        
+        // Double-check DOM elements are ready
+        if (!listEl || !tableWrap || !tableBody || !emptyState) {
+          console.error('❌ DOM elements still not ready after initialization');
+          showToast('Dashboard not ready. Please refresh the page.', 'error');
+          return;
+        }
+        
+        console.log('✅ DOM elements ready, rendering dashboard...');
+        render();
+        showToast(`Loaded ${state.items.length} items and ${state.purchases.length} purchases`, 'success');
+        
+      } catch (error) {
+        console.error("Error loading data: ", error);
+        console.error("Error details:", error.code, error.message);
+        showToast('Error loading data. Please refresh the page.', 'error');
+        
+        // Show empty state if data loading fails
+        state.items = [];
+        state.purchases = [];
+        render();
+      } finally {
+        // Hide loading indicator
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        if (loadingIndicator) {
+          loadingIndicator.classList.add('hidden');
+        }
+      }
+    }
+    
+    // Save data to Firestore
+    function saveItemToCloud(item) {
+      const userId = auth.currentUser.uid;
+      const itemRef = db.collection('users').doc(userId).collection('items').doc(item.id);
+      
+      return itemRef.set(item)
+        .then(() => {
+          console.log("Item successfully saved!");
+          return true;
+        })
+        .catch((error) => {
+          console.error("Error saving item: ", error);
+          showToast('Error saving item', 'error');
+          return false;
+        });
+    }
+    
+    function savePurchaseToCloud(purchase) {
+      const userId = auth.currentUser.uid;
+      const purchaseRef = db.collection('users').doc(userId).collection('purchases').doc(purchase.id);
+      
+      return purchaseRef.set(purchase)
+        .then(() => {
+          console.log("Purchase successfully saved!");
+          return true;
+        })
+        .catch((error) => {
+          console.error("Error saving purchase: ", error);
+          showToast('Error saving purchase', 'error');
+          return false;
+        });
+    }
+    
+    function deleteItemFromCloud(itemId) {
+      const userId = auth.currentUser.uid;
+      
+      // First delete all purchases for this item
+      const purchasePromises = state.purchases
+        .filter(p => p.itemId === itemId)
+        .map(p => 
+          db.collection('users').doc(userId).collection('purchases').doc(p.id).delete()
+        );
+      
+      // Then delete the item itself
+      return Promise.all(purchasePromises)
+        .then(() => {
+          return db.collection('users').doc(userId).collection('items').doc(itemId).delete();
+        })
+        .then(() => {
+          console.log("Item and its purchases successfully deleted!");
+          return true;
+        })
+        .catch((error) => {
+          console.error("Error deleting item: ", error);
+          showToast('Error deleting item', 'error');
+          return false;
+        });
+    }
+    
+    function deletePurchaseFromCloud(purchaseId) {
+      const userId = auth.currentUser.uid;
+      
+      return db.collection('users').doc(userId).collection('purchases').doc(purchaseId).delete()
+        .then(() => {
+          console.log("Purchase successfully deleted!");
+          return true;
+        })
+        .catch((error) => {
+          console.error("Error deleting purchase: ", error);
+          showToast('Error deleting purchase', 'error');
+          return false;
+        });
+    }
+    
+    // Elements - will be initialized when DOM is ready
+    let listEl, tableWrap, tableBody, statProducts, statQty, statLast, statSuppliers, emptyState;
+    let q, sortBy, viewMode;
+    let itemModalWrap, itemModalTitle, f_name, f_sku, f_supplier, f_category, f_openQty, f_unit, f_photo;
+    let detailModalWrap, detailTitle, detailBody;
+    let purchaseModalWrap, p_item, p_qty, p_date, p_note;
     let editingId = null;
 
-    const detailModalWrap = document.getElementById('detailModalWrap');
-    const detailTitle = document.getElementById('detailTitle');
-    const detailBody = document.getElementById('detailBody');
+    // Initialize DOM elements when they're ready
+    function initializeDOMElements() {
+      listEl = document.getElementById('list');
+      tableWrap = document.getElementById('tableWrap');
+      tableBody = document.getElementById('tableBody');
+      statProducts = document.getElementById('statProducts');
+      statQty = document.getElementById('statQty');
+      statLast = document.getElementById('statLast');
+      statSuppliers = document.getElementById('statSuppliers');
+      emptyState = document.getElementById('emptyState');
 
-    const purchaseModalWrap = document.getElementById('purchaseModalWrap');
-    const p_item = document.getElementById('p_item');
-    const p_qty = document.getElementById('p_qty');
-    const p_date = document.getElementById('p_date');
-    const p_note = document.getElementById('p_note');
+      // Search & Sort
+      q = document.getElementById('q');
+      sortBy = document.getElementById('sortBy');
+      viewMode = document.getElementById('viewMode');
 
-    /*** UI Enhancements ***/
-    // Toast notification function
+      // Modals
+      itemModalWrap = document.getElementById('itemModalWrap');
+      itemModalTitle = document.getElementById('itemModalTitle');
+      f_name = document.getElementById('f_name');
+      f_sku = document.getElementById('f_sku');
+      f_supplier = document.getElementById('f_supplier');
+      f_category = document.getElementById('f_category');
+      f_openQty = document.getElementById('f_openQty');
+      f_unit = document.getElementById('f_unit');
+      f_photo = document.getElementById('f_photo');
+
+      detailModalWrap = document.getElementById('detailModalWrap');
+      detailTitle = document.getElementById('detailTitle');
+      detailBody = document.getElementById('detailBody');
+
+      purchaseModalWrap = document.getElementById('purchaseModalWrap');
+      p_item = document.getElementById('p_item');
+      p_qty = document.getElementById('p_qty');
+      p_date = document.getElementById('p_date');
+      p_note = document.getElementById('p_note');
+
+      console.log('✅ DOM elements initialized');
+    }
+
+    // Initialize DOM elements when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('🔄 DOM loaded, initializing elements...');
+      initializeDOMElements();
+      
+      // If user is already logged in, ensure dashboard is ready
+      if (auth.currentUser) {
+        console.log('🔄 User already logged in, ensuring dashboard is ready...');
+        setTimeout(() => {
+          if (!listEl || !tableWrap || !tableBody || !emptyState) {
+            console.log('🔄 Re-initializing DOM elements...');
+            initializeDOMElements();
+          }
+        }, 500);
+      }
+      
+      // Add a fallback to ensure dashboard is visible
+      setTimeout(() => {
+        const appElement = document.getElementById('app');
+        if (appElement && appElement.classList.contains('show')) {
+          console.log('🔄 Dashboard is visible, ensuring content is loaded...');
+          if (!listEl || !tableWrap || !tableBody || !emptyState) {
+            console.log('🔄 Final DOM element initialization...');
+            initializeDOMElements();
+          }
+        }
+      }, 1000);
+    });
+
+    // UI Enhancements
     function showToast(message, type = 'success') {
       const toast = document.getElementById('toast');
       const toastMessage = document.getElementById('toastMessage');
@@ -1183,8 +3297,14 @@
       }, 3000);
     }
 
-    /*** Helpers ***/
+    // Helpers
     function calcTotals(){
+      // Check if DOM elements are ready
+      if (!statProducts || !statQty || !statLast || !statSuppliers) {
+        console.warn('⚠️ Stats elements not ready for calcTotals');
+        return;
+      }
+
       const items = state.items;
       const pmap = new Map(items.map(i=>[i.id,0]));
       let lastDate = null; const suppliers = new Set();
@@ -1210,6 +3330,13 @@
     }
 
     function render(){
+      // Check if DOM elements are ready
+      if (!listEl || !tableWrap || !tableBody || !emptyState) {
+        console.warn('⚠️ DOM elements not ready, retrying in 100ms...');
+        setTimeout(render, 100);
+        return;
+      }
+
       calcTotals();
       const term = (q.value||'').toLowerCase();
       let items = state.items.filter(i=>{
@@ -1244,6 +3371,8 @@
           tableBody.innerHTML = items.map(rowHTML).join('');
         }
       }
+      
+      console.log('✅ Dashboard rendered successfully');
     }
 
     function cardHTML(i){
@@ -1291,7 +3420,7 @@
       return String(str).replace(/[&<>"]/g, s=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[s]));
     }
 
-    /*** Item CRUD ***/
+    // Item CRUD
     function openItemModal(editId=null){
       editingId = editId;
       itemModalTitle.textContent = editId? '<i class="fas fa-edit"></i> Edit Item' : '<i class="fas fa-plus"></i> Add Item';
@@ -1303,7 +3432,10 @@
       }
       itemModalWrap.style.display='flex';
     }
-    function closeItemModal(){ itemModalWrap.style.display='none'; }
+    
+    function closeItemModal(){ 
+      itemModalWrap.style.display='none'; 
+    }
 
     async function fileToBase64(file){
       if(!file) return null;
@@ -1323,114 +3455,170 @@
         const b64 = await fileToBase64(f_photo.files[0]);
         item.photo = b64;
       }
+      
+      // Save to cloud instead of localStorage
+      const success = await saveItemToCloud(item);
+      if (!success) return;
+      
       if(editingId){
         state.items = state.items.map(x=> x.id===editingId? item : x);
         showToast('Item updated successfully');
       } else {
         state.items.push(item);
-        if(item.openQty>0){ state.purchases.push({id:uid(), itemId:item.id, qty:Number(item.openQty), date: todayStr(), note:'Opening'}); }
+        if(item.openQty>0){ 
+          const purchase = {id:uid(), itemId:item.id, qty:Number(item.openQty), date: todayStr(), note:'Opening'};
+          const purchaseSuccess = await savePurchaseToCloud(purchase);
+          if (purchaseSuccess) {
+            state.purchases.push(purchase);
+          }
+        }
         showToast('Item added successfully');
       }
-      save(state); render();
+      
+      render();
       if(addAnother){ openItemModal(null); } else { closeItemModal(); }
     }
 
     function editItem(id){ openItemModal(id); }
-    function deleteItem(id){
+    
+    async function deleteItem(id){
       if(!confirm('Delete this item and its purchase records?')) return;
+      
+      const success = await deleteItemFromCloud(id);
+      if (!success) return;
+      
       state.items = state.items.filter(i=>i.id!==id);
       state.purchases = state.purchases.filter(p=>p.itemId!==id);
-      save(state); 
       showToast('Item deleted successfully');
       render();
     }
 
-    /*** Detail & Purchases ***/
+    // Detail & Purchases
     function openDetail(id){
       const i = state.items.find(x=>x.id===id);
-      detailTitle.textContent = ` ${i.name}`;
+      detailTitle.textContent = `${i.name}`;
       const ps = state.purchases.filter(p=>p.itemId===id).sort((a,b)=> new Date(b.date)-new Date(a.date));
       const qty = itemTotalQty(id);
-      detailBody.innerHTML = `
-        <div class="row wrap" style="gap:16px;align-items:flex-start">
-          <div class="panel" style="padding:12px;max-width:340px">
-            <div class="thumb" style="border-radius:12px;overflow:hidden">${i.photo?`<img src="${i.photo}" alt="${escapeHtml(i.name)}"/>`:'<i class="fas fa-image"></i> No Photo'}</div>
-            <div style="margin-top:10px" class="sub"><i class="fas fa-barcode"></i> SKU: ${escapeHtml(i.sku||'-')}</div>
-            <div class="sub"><i class="fas fa-truck"></i> Supplier: ${escapeHtml(i.supplier||'-')}</div>
-            <div class="sub"><i class="fas fa-folder"></i> Category: ${escapeHtml(i.category||'-')}</div>
-            <div class="sub"><i class="fas fa-balance-scale"></i> Unit: ${escapeHtml(i.unit||'pcs')}</div>
-            <div class="row" style="margin-top:10px"><span class="chip"><i class="fas fa-layer-group"></i> Total Qty: ${qty}</span></div>
-            <div class="row" style="margin-top:10px;gap:8px">
-              <button class="btn" onclick="openPurchaseFor('${i.id}')"><i class="fas fa-cart-plus"></i> Add Purchase</button>
-              <button class="btn" onclick="editItem('${i.id}')"><i class="fas fa-edit"></i> Edit</button>
-            </div>
-          </div>
-          <div class="panel" style="padding:12px;flex:1;min-width:340px">
-            <div class="row" style="justify-content:space-between;align-items:center">
-              <h3 style="margin:6px 0"><i class="fas fa-history"></i> Purchase History</h3>
-              <button class="btn bad" onclick="deleteAllPurchases('${i.id}')"><i class="fas fa-trash"></i> Clear History</button>
-            </div>
-            ${ps.length?`<table><thead><tr><th>Date</th><th>Qty</th><th>Note</th><th>Action</th></tr></thead><tbody>
-                ${ps.map(p=>`<tr><td>${fmtDate(p.date)}</td><td>${p.qty}</td><td>${escapeHtml(p.note||'')}</td><td><button class="btn bad btn-sm" onclick="deletePurchase('${p.id}')"><i class="fas fa-trash"></i></button></td></tr>`).join('')}
-            </tbody></table>`: `<div class='empty'><i class="fas fa-history"></i> No purchases yet</div>`}
-          </div>
-        </div>`;
+             detailBody.innerHTML = `
+         <div class="detail-layout">
+           <div class="detail-info-panel">
+             <div class="thumb" style="border-radius:12px;overflow:hidden;margin-bottom:16px">${i.photo?`<img src="${i.photo}" alt="${escapeHtml(i.name)}"/>`:'<i class="fas fa-image"></i> No Photo'}</div>
+             <div class="info-item"><i class="fas fa-barcode"></i> SKU: ${escapeHtml(i.sku||'-')}</div>
+             <div class="info-item"><i class="fas fa-truck"></i> Supplier: ${escapeHtml(i.supplier||'-')}</div>
+             <div class="info-item"><i class="fas fa-folder"></i> Category: ${escapeHtml(i.category||'-')}</div>
+             <div class="info-item"><i class="fas fa-balance-scale"></i> Unit: ${escapeHtml(i.unit||'pcs')}</div>
+             <div class="info-item"><i class="fas fa-layer-group"></i> Total Qty: ${qty}</div>
+             <div class="detail-actions">
+               <button class="btn brand" onclick="openPurchaseFor('${i.id}')"><i class="fas fa-cart-plus"></i> Add Purchase</button>
+               <button class="btn" onclick="editItem('${i.id}')"><i class="fas fa-edit"></i> Edit</button>
+             </div>
+           </div>
+           <div class="detail-history-panel">
+             <div class="history-header">
+               <h3><i class="fas fa-history"></i> Purchase History</h3>
+               <button class="btn bad" onclick="deleteAllPurchases('${i.id}')"><i class="fas fa-trash"></i> Clear History</button>
+             </div>
+             ${ps.length?`<div class="purchase-history-table">
+               <div class="purchase-header">
+                 <div class="purchase-col">Date</div>
+                 <div class="purchase-col">Qty</div>
+                 <div class="purchase-col">Notes</div>
+                 <div class="purchase-col">Action</div>
+               </div>
+               ${ps.map(p=>`<div class="purchase-row">
+                 <div class="purchase-col">${fmtDate(p.date)}</div>
+                 <div class="purchase-col">${p.qty}</div>
+                 <div class="purchase-col">${escapeHtml(p.note||'')}</div>
+                 <div class="purchase-col">
+                   <button class="btn bad btn-sm" onclick="deletePurchase('${p.id}')">
+                     <i class="fas fa-trash"></i>
+                   </button>
+                 </div>
+               </div>`).join('')}
+             </div>`: `<div class='empty'><i class="fas fa-history"></i> No purchases yet</div>`}
+           </div>
+         </div>`;
       detailModalWrap.style.display='flex';
     }
+    
     function closeDetail(){ detailModalWrap.style.display='none'; }
 
-    function deletePurchase(pid){
+    async function deletePurchase(pid){
+      // Show confirmation popup
+      if (!confirm('Are you sure you want to delete this purchase record?')) return;
+      
+      const success = await deletePurchaseFromCloud(pid);
+      if (!success) return;
+      
       state.purchases = state.purchases.filter(p=>p.id!==pid);
-      save(state); 
       showToast('Purchase record deleted');
       render();
       // refresh detail if open
       const open = detailModalWrap.style.display==='flex';
       if(open){ const id = (detailTitle.textContent && state.items.find(i=>i.name===detailTitle.textContent)?.id); if(id) openDetail(id); }
     }
-    function deleteAllPurchases(itemId){
+    
+    async function deleteAllPurchases(itemId){
       if(!confirm('Clear all purchases for this item?')) return;
+      
+      const purchasePromises = state.purchases
+        .filter(p => p.itemId === itemId)
+        .map(p => deletePurchaseFromCloud(p.id));
+      
+      await Promise.all(purchasePromises);
+      
       state.purchases = state.purchases.filter(p=>p.itemId!==itemId);
-      save(state); 
       showToast('All purchase records cleared');
       render(); 
       openDetail(itemId);
     }
 
-    /*** Purchase Modal ***/
+    // Purchase Modal
     function openPurchase(){
       p_item.innerHTML = state.items.map(i=>`<option value='${i.id}'>${escapeHtml(i.name)} (${escapeHtml(i.sku||'')})</option>`).join('');
       p_date.value = todayStr(); p_qty.value=1; p_note.value='';
       purchaseModalWrap.style.display='flex';
     }
+    
     function openPurchaseFor(itemId){ openPurchase(); p_item.value=itemId; }
     function closePurchase(){ purchaseModalWrap.style.display='none'; }
 
-    function addPurchase(){
+    async function addPurchase(){
       if(!p_item.value){ showToast('Please choose an item', 'error'); return; }
       const rec = { id:uid(), itemId:p_item.value, qty:Number(p_qty.value||0), date: p_date.value||todayStr(), note: p_note.value.trim() };
       if(rec.qty<=0){ showToast('Quantity must be greater than 0', 'error'); return; }
-      state.purchases.push(rec); save(state); 
+      
+      const success = await savePurchaseToCloud(rec);
+      if (!success) return;
+      
+      state.purchases.push(rec); 
       showToast('Purchase added successfully');
       render(); closePurchase();
     }
 
-    /*** Import/Export/Reset ***/
+    // Import/Export/Reset
     function exportJSON(){
       const blob = new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
       const url = URL.createObjectURL(blob);
-      const a = document.createElement('a'); a.href=url; a.download='ss-inventory.json'; a.click(); URL.revokeObjectURL(url);
+      const a = document.createElement('a'); a.href=url; a.download='khodal-inventory.json'; a.click(); URL.revokeObjectURL(url);
       showToast('Data exported successfully');
     }
+    
     function importJSONFile(file){
       const r = new FileReader();
-      r.onload=()=>{ 
+      r.onload=async()=>{ 
         try{ 
           const data = JSON.parse(r.result); 
           if(!data.items||!data.purchases) throw new Error('Invalid format'); 
-          state=data; 
-          save(state); 
-          render(); 
+          
+          // Save all items to cloud
+          const itemPromises = data.items.map(item => saveItemToCloud(item));
+          const purchasePromises = data.purchases.map(purchase => savePurchaseToCloud(purchase));
+          
+          await Promise.all([...itemPromises, ...purchasePromises]);
+          
+          state = data;
+          render();
           showToast('Data imported successfully');
         }catch(e){ 
           showToast('Invalid JSON file format', 'error'); 
@@ -1438,32 +3626,55 @@
       };
       r.readAsText(file);
     }
-    function resetData(){ 
-      if(confirm('Reset all data? This cannot be undone.')){
-        state={items:[],purchases:[]}; 
-        save(state); 
-        render();
-        showToast('All data has been reset');
-      } 
+    
+    async function resetData(){ 
+      if(!confirm('Reset all data? This cannot be undone.')) return;
+      
+      const userId = auth.currentUser.uid;
+      
+      // Delete all items
+      const itemPromises = state.items.map(item => 
+        db.collection('users').doc(userId).collection('items').doc(item.id).delete()
+      );
+      
+      // Delete all purchases
+      const purchasePromises = state.purchases.map(purchase => 
+        db.collection('users').doc(userId).collection('purchases').doc(purchase.id).delete()
+      );
+      
+      await Promise.all([...itemPromises, ...purchasePromises]);
+      
+      state={items:[],purchases:[]}; 
+      render();
+      showToast('All data has been reset');
     }
 
-    /*** Bulk Add for 200 items (placeholder generator) ***/
-    function bulkAdd(){
+    // Bulk Add for 200 items (placeholder generator)
+    async function bulkAdd(){
       if(!confirm('Create 200 sample products?')) return;
       const base = Date.now();
+      
       for(let n=1;n<=200;n++){
         const id=uid();
-        state.items.push({id, name:`SS Item ${n}`, sku:`SS-${String(n).padStart(3,'0')}`, supplier: n%5===0? 'Shree Metals' : n%3===0? 'Om Steel' : 'ABC Steel', category: n%2===0? 'Kitchen':'Industrial', unit:'pcs', created: base - n*10000});
+        const item = {id, name:`SS Item ${n}`, sku:`SS-${String(n).padStart(3,'0')}`, supplier: n%5===0? 'Shree Metals' : n%3===0? 'Om Steel' : 'ABC Steel', category: n%2===0? 'Kitchen':'Industrial', unit:'pcs', created: base - n*10000};
+        
+        await saveItemToCloud(item);
+        state.items.push(item);
+        
         // opening qty random
         const oq = Math.floor(Math.random()*5);
-        if(oq>0){ state.purchases.push({id:uid(), itemId:id, qty:oq, date: todayStr(), note:'Opening'}); }
+        if(oq>0){ 
+          const purchase = {id:uid(), itemId:id, qty:oq, date: todayStr(), note:'Opening'};
+          await savePurchaseToCloud(purchase);
+          state.purchases.push(purchase);
+        }
       }
-      save(state); 
+      
       showToast('200 sample products created');
       render();
     }
 
-    /*** Wire up ***/
+    // Wire up event listeners
     document.getElementById('addItemBtn').onclick = ()=> openItemModal();
     document.getElementById('saveItemBtn').onclick = ()=> saveItem(false);
     document.getElementById('saveItemAddMoreBtn').onclick = ()=> saveItem(true);
@@ -1481,27 +3692,74 @@
       const statsSection = document.getElementById('stats');
       statsSection.scrollIntoView({ behavior: 'smooth' });
     };
+    
+    // Test Firebase connection
+    document.getElementById('testFirebaseBtn').onclick = async () => {
+      try {
+        console.log('🧪 Testing Firebase connection...');
+        
+        if (!auth.currentUser) {
+          showToast('No user logged in', 'error');
+          return;
+        }
+        
+        const userId = auth.currentUser.uid;
+        console.log('Current user ID:', userId);
+        
+        // Test writing to Firestore
+        const testDoc = await db.collection('users').doc(userId).collection('test').doc('connection-test').set({
+          timestamp: new Date(),
+          message: 'Firebase connection test successful!'
+        });
+        
+        console.log('✅ Write test successful');
+        
+        // Test reading from Firestore
+        const testRead = await db.collection('users').doc(userId).collection('test').doc('connection-test').get();
+        
+        if (testRead.exists) {
+          console.log('✅ Read test successful:', testRead.data());
+          showToast('Firebase connection test successful!', 'success');
+        } else {
+          showToast('Firebase read test failed', 'error');
+        }
+        
+      } catch (error) {
+        console.error('❌ Firebase test failed:', error);
+        showToast('Firebase test failed: ' + error.message, 'error');
+      }
+    };
 
-    q.oninput = render; 
-    sortBy.onchange = render; 
-    viewMode.onchange = render;
+    // Event listeners for search and sorting
+    if (q) q.oninput = render; 
+    if (sortBy) sortBy.onchange = render; 
+    if (viewMode) viewMode.onchange = render;
 
     // Close modals on backdrop click
     [itemModalWrap, detailModalWrap, purchaseModalWrap].forEach(el=> {
-      el.addEventListener('click', (e)=>{ 
-        if(e.target===el){ 
-          el.style.display='none'; 
-        } 
-      });
+      if (el) {
+        el.addEventListener('click', (e)=>{ 
+          if(e.target===el){ 
+            el.style.display='none'; 
+          } 
+        });
+      }
     });
 
-    // First render
-    render();
-
     // Set today's date as default for purchase date
-    p_date.value = todayStr();
-
-    // Expose some functions to window
+    if (p_date) p_date.value = todayStr();
+    
+    // Initialize the app
+    console.log('🚀 Khodal Enterprise Inventory Management System initialized');
+    
+    // Add helpful console messages
+    console.log('💡 Tips:');
+    console.log('- Use Ctrl+N to quickly add new items');
+    console.log('- Use Ctrl+F to focus the search bar');
+    console.log('- Press Escape to close any open modals');
+    console.log('- Your data is automatically saved to Firebase');
+    
+    // Expose functions to window for onclick handlers
     window.openDetail = openDetail;
     window.closeDetail = closeDetail;
     window.openPurchaseFor = openPurchaseFor;
@@ -1515,11 +3773,11 @@
     // Keyboard shortcuts
     document.addEventListener('keydown',(e)=>{
       if(e.key==='n' && (e.ctrlKey||e.metaKey)){ e.preventDefault(); openItemModal(); }
-      if(e.key==='f' && (e.ctrlKey||e.metaKey)){ e.preventDefault(); document.getElementById('q').focus(); }
+      if(e.key==='f' && (e.ctrlKey||e.metaKey)){ e.preventDefault(); if(q) q.focus(); }
       if(e.key==='Escape'){ 
-        if(itemModalWrap.style.display==='flex') closeItemModal();
-        if(detailModalWrap.style.display==='flex') closeDetail();
-        if(purchaseModalWrap.style.display==='flex') closePurchase();
+        if(itemModalWrap && itemModalWrap.style.display==='flex') closeItemModal();
+        if(detailModalWrap && detailModalWrap.style.display==='flex') closeDetail();
+        if(purchaseModalWrap && purchaseModalWrap.style.display==='flex') closePurchase();
       }
     });
   </script>
