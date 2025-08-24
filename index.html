@@ -654,6 +654,58 @@
       width: 100%;
       padding-left: 40px;
       position: relative;
+      transition: all 0.3s ease;
+    }
+    
+    .search-wrapper input:focus {
+      border-color: var(--brand);
+      box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.2);
+      transform: translateY(-1px);
+    }
+    
+    .search-wrapper input:not(:placeholder-shown) {
+      background: rgba(6, 182, 212, 0.1);
+      border-color: var(--brand);
+    }
+    
+    .search-status {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--brand);
+      background: rgba(6, 182, 212, 0.1);
+      padding: 4px 8px;
+      border-radius: 12px;
+      backdrop-filter: blur(10px);
+    }
+    
+    .clear-search-btn {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #ef4444;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 10px;
+    }
+    
+    .clear-search-btn:hover {
+      background: rgba(239, 68, 68, 0.2);
+      transform: translateY(-50%) scale(1.1);
     }
     
     /* Stats */
@@ -961,6 +1013,14 @@
       backdrop-filter: blur(10px);
     }
     
+    @media (max-width: 768px) {
+      .modal-backdrop {
+        padding: 10px;
+        align-items: flex-start;
+        padding-top: 20px;
+      }
+    }
+    
     .modal {
       width: min(920px, 96vw);
       max-height: 90vh;
@@ -1199,13 +1259,24 @@
       }
       
       .modal {
-        width: 95vw;
-        max-height: 85vh;
+        width: 98vw;
+        max-height: 90vh;
         margin: 0;
+        border-radius: 12px;
       }
       
       .modal .body {
-        padding: 16px;
+        padding: 12px;
+        max-height: calc(90vh - 80px);
+        overflow-y: auto;
+      }
+      
+      .modal header {
+        padding: 12px 16px;
+      }
+      
+      .modal header strong {
+        font-size: 16px;
       }
     }
     
@@ -1884,47 +1955,74 @@
     @media (max-width: 768px) {
       .detail-layout {
         grid-template-columns: 1fr;
-        gap: 20px;
+        gap: 16px;
       }
       
       .detail-info-panel,
       .detail-history-panel {
-        padding: 16px;
+        padding: 12px;
       }
       
       .detail-actions {
         flex-direction: column;
-        gap: 10px;
+        gap: 8px;
       }
       
       .detail-actions .btn {
         min-width: auto;
+        padding: 10px 16px;
+        font-size: 14px;
+      }
+      
+      .detail-info-panel .thumb {
+        margin-bottom: 12px;
+      }
+      
+      .info-item {
+        font-size: 14px;
+        margin-bottom: 8px;
       }
       
       .history-header {
         flex-direction: column;
-        gap: 12px;
+        gap: 10px;
         align-items: stretch;
+        margin-bottom: 12px;
       }
       
       .history-header .btn {
         width: 100%;
         justify-content: center;
+        padding: 10px 16px;
+        font-size: 14px;
+      }
+      
+      .history-header h3 {
+        font-size: 16px;
+        margin: 0;
       }
       
       .purchase-header,
       .purchase-row {
-        grid-template-columns: 1fr 60px 1fr 60px;
-        gap: 8px;
-        padding: 10px 12px;
+        grid-template-columns: 1fr 50px 1fr 50px;
+        gap: 6px;
+        padding: 8px 10px;
       }
       
       .purchase-col {
-        font-size: 13px;
+        font-size: 12px;
       }
       
       .purchase-col:nth-child(3) {
-        max-width: 120px;
+        max-width: 100px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      
+      .purchase-history-table {
+        max-height: 300px;
+        overflow-y: auto;
       }
       
       .modal .body {
@@ -2026,6 +2124,8 @@
         display: none;
       }
       
+
+      
       /* 2-column grid for action buttons on mobile */
       .controls .row.wrap {
         display: grid;
@@ -2056,6 +2156,12 @@
       .header-actions {
         justify-content: center;
         gap: 12px;
+      }
+      
+      .header-actions #logoutBtn {
+        padding: 10px 16px;
+        font-size: 14px;
+        min-width: auto;
       }
       
 
@@ -2781,6 +2887,287 @@
         touch-action: manipulation;
       }
     }
+    
+    /* 3D Reload Animation Styles */
+    .reload-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, var(--bg) 0%, #0f172a 50%, #1e293b 100%);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      backdrop-filter: blur(20px);
+    }
+    
+    .reload-overlay.show {
+      display: flex;
+      animation: fadeInOverlay 0.5s ease-out;
+    }
+    
+    @keyframes fadeInOverlay {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    .reload-container {
+      text-align: center;
+      position: relative;
+    }
+    
+    .reload-cube {
+      width: 80px;
+      height: 80px;
+      position: relative;
+      transform-style: preserve-3d;
+      animation: cubeRotate 2s infinite linear;
+      margin: 0 auto 30px;
+    }
+    
+    @keyframes cubeRotate {
+      0% { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg); }
+      100% { transform: rotateX(360deg) rotateY(360deg) rotateZ(360deg); }
+    }
+    
+    .cube-face {
+      position: absolute;
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, var(--brand), var(--accent));
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: white;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 25px rgba(6, 182, 212, 0.3);
+    }
+    
+    .cube-face.front { transform: translateZ(40px); }
+    .cube-face.back { transform: translateZ(-40px) rotateY(180deg); }
+    .cube-face.right { transform: translateX(40px) rotateY(90deg); }
+    .cube-face.left { transform: translateX(-40px) rotateY(-90deg); }
+    .cube-face.top { transform: translateY(-40px) rotateX(90deg); }
+    .cube-face.bottom { transform: translateY(40px) rotateX(-90deg); }
+    
+    .reload-text {
+      color: var(--text);
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 10px;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .reload-subtext {
+      color: var(--sub);
+      font-size: 14px;
+      opacity: 0.8;
+    }
+    
+    .reload-progress {
+      width: 200px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+      margin: 20px auto 0;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .reload-progress-bar {
+      height: 100%;
+      background: var(--gradient);
+      border-radius: 2px;
+      width: 0%;
+      animation: progressFill 2s ease-in-out infinite;
+      position: relative;
+    }
+    
+    .reload-progress-bar::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      animation: shimmer 1.5s infinite;
+    }
+    
+    @keyframes progressFill {
+      0% { width: 0%; }
+      50% { width: 100%; }
+      100% { width: 0%; }
+    }
+    
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+    
+    /* Floating particles animation */
+    .reload-particles {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    
+    .particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: var(--brand);
+      border-radius: 50%;
+      animation: float 3s infinite ease-in-out;
+    }
+    
+    @keyframes float {
+      0%, 100% { 
+        transform: translateY(0px) translateX(0px) scale(1);
+        opacity: 0.3;
+      }
+      50% { 
+        transform: translateY(-20px) translateX(10px) scale(1.2);
+        opacity: 1;
+      }
+    }
+    
+    .particle:nth-child(1) { left: 10%; animation-delay: 0s; }
+    .particle:nth-child(2) { left: 20%; animation-delay: 0.5s; }
+    .particle:nth-child(3) { left: 30%; animation-delay: 1s; }
+    .particle:nth-child(4) { left: 40%; animation-delay: 1.5s; }
+    .particle:nth-child(5) { left: 50%; animation-delay: 2s; }
+    .particle:nth-child(6) { left: 60%; animation-delay: 2.5s; }
+    .particle:nth-child(7) { left: 70%; animation-delay: 0.3s; }
+    .particle:nth-child(8) { left: 80%; animation-delay: 0.8s; }
+    .particle:nth-child(9) { left: 90%; animation-delay: 1.3s; }
+    .particle:nth-child(10) { left: 95%; animation-delay: 1.8s; }
+    
+    /* Enhanced cube animation with glow effect */
+    .reload-cube::before {
+      content: '';
+      position: absolute;
+      top: -10px;
+      left: -10px;
+      right: -10px;
+      bottom: -10px;
+      background: radial-gradient(circle, rgba(6, 182, 212, 0.2) 0%, transparent 70%);
+      border-radius: 50%;
+      animation: glowPulse 2s infinite ease-in-out;
+      z-index: -1;
+    }
+    
+    /* Additional pulsing ring effect */
+    .reload-cube::after {
+      content: '';
+      position: absolute;
+      top: -20px;
+      left: -20px;
+      right: -20px;
+      bottom: -20px;
+      border: 2px solid rgba(6, 182, 212, 0.3);
+      border-radius: 50%;
+      animation: pulseRing 2s infinite ease-in-out;
+      z-index: -2;
+    }
+    
+    @keyframes pulseRing {
+      0% {
+        transform: scale(0.8);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(1.2);
+        opacity: 0;
+      }
+    }
+    
+    @keyframes glowPulse {
+      0%, 100% { 
+        transform: scale(1);
+        opacity: 0.5;
+      }
+      50% { 
+        transform: scale(1.1);
+        opacity: 0.8;
+      }
+    }
+    
+    /* Responsive design for reload animation */
+    @media (max-width: 768px) {
+      .reload-cube {
+        width: 60px;
+        height: 60px;
+      }
+      
+      .cube-face {
+        width: 60px;
+        height: 60px;
+        font-size: 18px;
+      }
+      
+      .cube-face.front { transform: translateZ(30px); }
+      .cube-face.back { transform: translateZ(-30px) rotateY(180deg); }
+      .cube-face.right { transform: translateX(30px) rotateY(90deg); }
+      .cube-face.left { transform: translateX(-30px) rotateY(-90deg); }
+      .cube-face.top { transform: translateY(-30px) rotateX(90deg); }
+      .cube-face.bottom { transform: translateY(30px) rotateX(-90deg); }
+      
+      .reload-text {
+        font-size: 16px;
+      }
+      
+      .reload-subtext {
+        font-size: 12px;
+      }
+      
+      .reload-progress {
+        width: 150px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .reload-cube {
+        width: 50px;
+        height: 50px;
+      }
+      
+      .cube-face {
+        width: 50px;
+        height: 50px;
+        font-size: 16px;
+      }
+      
+      .cube-face.front { transform: translateZ(25px); }
+      .cube-face.back { transform: translateZ(-25px) rotateY(180deg); }
+      .cube-face.right { transform: translateX(25px) rotateY(90deg); }
+      .cube-face.left { transform: translateX(-25px) rotateY(-90deg); }
+      .cube-face.top { transform: translateY(-25px) rotateX(90deg); }
+      .cube-face.bottom { transform: translateY(25px) rotateX(-90deg); }
+      
+      .reload-text {
+        font-size: 14px;
+      }
+      
+      .reload-subtext {
+        font-size: 11px;
+      }
+      
+      .reload-progress {
+        width: 120px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -2891,6 +3278,37 @@
     </div>
   </div>
 
+  <!-- 3D Reload Overlay -->
+  <div class="reload-overlay" id="reloadOverlay">
+    <div class="reload-particles">
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+    </div>
+    <div class="reload-container">
+      <div class="reload-cube">
+        <div class="cube-face front"><i class="fas fa-cube"></i></div>
+        <div class="cube-face back"><i class="fas fa-cube"></i></div>
+        <div class="cube-face right"><i class="fas fa-cube"></i></div>
+        <div class="cube-face left"><i class="fas fa-cube"></i></div>
+        <div class="cube-face top"><i class="fas fa-cube"></i></div>
+        <div class="cube-face bottom"><i class="fas fa-cube"></i></div>
+      </div>
+      <div class="reload-text">Reloading System</div>
+      <div class="reload-subtext">Please wait while we refresh your session</div>
+      <div class="reload-progress">
+        <div class="reload-progress-bar"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- Main App -->
   <div class="app" id="app">
     <header class="header">
@@ -2907,7 +3325,8 @@
       <div class="header-actions" style="display: flex; align-items: center; gap: 15px;">
         <span class="muted user-email-mobile" id="userEmail"></span>
         <button class="btn bad" id="logoutBtn">
-          <i class="fas fa-sign-out-alt"></i> 
+          <i class="fas fa-sign-out-alt"></i>
+          
         </button>
       </div>
       
@@ -2932,6 +3351,13 @@
               <div class="search-wrapper">
                 <i class="fas fa-search"></i>
                 <input id="q" type="search" placeholder="Search by name, SKU, or supplier..." />
+                <button id="clearSearch" class="clear-search-btn" style="display: none;" onclick="clearSearch()">
+                  <i class="fas fa-times"></i>
+                </button>
+                <div id="searchStatus" class="search-status" style="display: none;">
+                  <i class="fas fa-spinner fa-spin"></i>
+                  <span>Searching...</span>
+                </div>
               </div>
             </div>
             
@@ -3005,11 +3431,7 @@
               <i class="fas fa-chart-bar"></i>
               <span>View Stats</span>
             </button>
-            <button class="btn warn" id="testFirebaseBtn">
-              <i class="fas fa-bug"></i>
-              <span>Test Firebase</span>
-            </button>
-          </div>
+           </div>
         </div>
 
         <section class="stats" id="stats">
@@ -3258,7 +3680,9 @@
     const db = firebase.firestore();
     const storage = firebase.storage();
     
-    // Authentication state observer
+    // Authentication state observer with improved session handling
+    let authStateInitialized = false;
+    
     auth.onAuthStateChanged(async (user) => {
       console.log('🔄 Auth state changed:', user ? 'User signed in' : 'User signed out');
       
@@ -3287,7 +3711,7 @@
           }
         }
         
-        // Wait for DOM to be ready before showing app
+        // Show app immediately if DOM is ready, otherwise wait
         if (document.readyState === 'loading') {
           document.addEventListener('DOMContentLoaded', () => {
             console.log('🔄 DOM ready, showing app...');
@@ -3301,12 +3725,37 @@
           loadData();
         }
         
+        authStateInitialized = true;
+        
       } else {
         // User is signed out
         console.log('👋 User signed out');
-        showLogin();
+        
+        // Only show login if auth state has been initialized
+        // This prevents showing login during initial page load
+        if (authStateInitialized) {
+          showLogin();
+        } else {
+          // Wait a bit longer for Firebase to restore session
+          setTimeout(() => {
+            if (!auth.currentUser) {
+              console.log('⏰ No session restored, showing login...');
+              showLogin();
+              authStateInitialized = true;
+            }
+          }, 2000); // Wait 2 seconds for session restoration
+        }
       }
     });
+    
+    // Set up Firebase persistence to remember user session
+    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+      .then(() => {
+        console.log('✅ Firebase persistence set to LOCAL');
+      })
+      .catch((error) => {
+        console.error('❌ Error setting Firebase persistence:', error);
+      });
     
     // UI Elements for login/register
     const loginPage = document.getElementById('loginPage');
@@ -3766,6 +4215,9 @@
       supplierModalWrap = document.getElementById('supplierModalWrap');
 
       console.log('✅ DOM elements initialized');
+      
+      // Set up event listeners after DOM elements are ready
+      setupEventListeners();
     }
 
     // Initialize DOM elements when page loads
@@ -3863,10 +4315,34 @@
 
       calcTotals();
       const term = (q.value||'').toLowerCase();
+      console.log('🔍 Search term:', term);
+      console.log('📦 Total items before filter:', state.items.length);
+      
+      // Show search status and clear button if there's a search term
+      const searchStatus = document.getElementById('searchStatus');
+      const clearSearchBtn = document.getElementById('clearSearch');
+      
+      if (searchStatus) {
+        if (term) {
+          searchStatus.style.display = 'flex';
+        } else {
+          searchStatus.style.display = 'none';
+        }
+      }
+      
+      if (clearSearchBtn) {
+        if (term) {
+          clearSearchBtn.style.display = 'flex';
+        } else {
+          clearSearchBtn.style.display = 'none';
+        }
+      }
+      
       let items = state.items.filter(i=>{
         const blob = `${i.name} ${i.sku||''} ${i.supplier||''} ${i.category||''}`.toLowerCase();
         return blob.includes(term);
       });
+      console.log('📦 Items after filter:', items.length);
       const s = sortBy.value;
       items.sort((a,b)=>{
         if(s==='name') return a.name.localeCompare(b.name);
@@ -3947,7 +4423,7 @@
     // Item CRUD
     function openItemModal(editId=null){
       editingId = editId;
-      itemModalTitle.textContent = editId? '<i class="fas fa-edit"></i> Edit Item' : '<i class="fas fa-plus"></i> Add Item';
+      itemModalTitle.textContent = editId? ' Edit Item' : '<i class="fas fa-plus"></i> Add Item';
       if(editId){
         const i = state.items.find(x=>x.id===editId);
         f_name.value=i.name||''; f_sku.value=i.sku||''; f_supplier.value=i.supplier||''; f_category.value=i.category||''; f_openQty.value=i.openQty||0; f_unit.value=i.unit||'pcs'; f_photo.value='';
@@ -4034,7 +4510,7 @@
              <div class="info-item"><i class="fas fa-layer-group"></i> Total Qty: ${qty}</div>
              <div class="detail-actions">
                <button class="btn brand" onclick="openPurchaseFor('${i.id}')"><i class="fas fa-cart-plus"></i> Add Purchase</button>
-               <button class="btn" onclick="editItem('${i.id}')"><i class="fas fa-edit"></i> Edit</button>
+               
              </div>
            </div>
            <div class="detail-history-panel">
@@ -4309,6 +4785,47 @@
       statsSection.scrollIntoView({ behavior: 'smooth' });
     };
     
+    // Reload button event listener
+    const reloadBtn = document.getElementById('reloadBtn');
+    if (reloadBtn) {
+      reloadBtn.addEventListener('click', () => {
+        if (auth.currentUser) {
+          showReloadAnimation();
+        } else {
+          showToast('Please log in first', 'warning');
+        }
+      });
+    }
+    
+    // Test search functionality
+    function testSearchFunctionality() {
+      console.log('🧪 Testing search functionality...');
+      if (!q) {
+        console.error('❌ Search input element not found');
+        showToast('Search input not found', 'error');
+        return;
+      }
+      
+      if (!q.oninput && !q._listeners) {
+        console.error('❌ Search input has no event listeners');
+        showToast('Search event listeners not set up', 'error');
+        return;
+      }
+      
+      console.log('✅ Search input element found');
+      console.log('✅ Search input value:', q.value);
+      console.log('✅ Search input placeholder:', q.placeholder);
+      
+      // Test if render function exists
+      if (typeof render === 'function') {
+        console.log('✅ Render function exists');
+        showToast('Search functionality is working correctly', 'success');
+      } else {
+        console.error('❌ Render function not found');
+        showToast('Render function not found', 'error');
+      }
+    }
+    
     // Test Firebase connection
     document.getElementById('testFirebaseBtn').onclick = async () => {
       try {
@@ -4347,9 +4864,47 @@
     };
 
     // Event listeners for search and sorting
-    if (q) q.oninput = render; 
-    if (sortBy) sortBy.onchange = render; 
-    if (viewMode) viewMode.onchange = render;
+    // Debounce function for search
+    let searchTimeout;
+    function debouncedRender() {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(render, 300);
+    }
+    
+    function setupEventListeners() {
+      if (q) {
+        // Remove any existing listeners to prevent duplicates
+        q.removeEventListener('input', debouncedRender);
+        q.addEventListener('input', debouncedRender);
+        console.log('✅ Search input event listener set up with debounce');
+      } else {
+        console.warn('⚠️ Search input element not found');
+      }
+      if (sortBy) {
+        sortBy.removeEventListener('change', render);
+        sortBy.addEventListener('change', render);
+      }
+      if (viewMode) {
+        viewMode.removeEventListener('change', render);
+        viewMode.addEventListener('change', render);
+      }
+    }
+    
+    // Set up event listeners after DOM initialization
+    setupEventListeners();
+    
+    // Fallback: Ensure search functionality works even if DOM elements are not ready initially
+    setTimeout(() => {
+      if (!q) {
+        console.log('🔄 Re-attempting search input setup...');
+        q = document.getElementById('q');
+        if (q) {
+          q.removeEventListener('input', debouncedRender);
+          q.addEventListener('input', debouncedRender);
+          console.log('✅ Search input event listener set up (fallback)');
+        }
+      }
+    }, 1000);
 
     // Close modals on backdrop click
     [itemModalWrap, detailModalWrap, purchaseModalWrap, supplierModalWrap].forEach(el=> {
@@ -4388,7 +4943,241 @@
     window.closeSupplier = closeSupplier;
     window.showSupplierProducts = showSupplierProducts;
     window.showSupplierList = showSupplierList;
+    window.testSearchFunctionality = testSearchFunctionality;
+    
+    // Clear search function
+    function clearSearch() {
+      if (q) {
+        q.value = '';
+        render();
+        q.focus();
+      }
+    }
+    window.clearSearch = clearSearch;
 
+    // 3D Reload Animation Functionality
+    const reloadOverlay = document.getElementById('reloadOverlay');
+    
+    // Function to show 3D reload animation
+    function showReloadAnimation() {
+      console.log('🔄 Starting 3D reload animation...');
+      
+      // Show the overlay
+      reloadOverlay.classList.add('show');
+      
+      // Add loading state to reload button
+      const reloadBtn = document.getElementById('reloadBtn');
+      if (reloadBtn) {
+        reloadBtn.disabled = true;
+        reloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span class="btn-text">Reloading...</span>';
+      }
+      
+      // Simulate reload process with progress updates
+      let progress = 0;
+      const progressBar = reloadOverlay.querySelector('.reload-progress-bar');
+      const progressInterval = setInterval(() => {
+        progress += 2;
+        if (progressBar) {
+          progressBar.style.width = `${progress}%`;
+        }
+        if (progress >= 100) {
+          clearInterval(progressInterval);
+        }
+      }, 60); // 3 seconds total = 60ms per 2%
+      
+      setTimeout(() => {
+        console.log('🔄 Reload animation completed, refreshing data...');
+        
+        // Hide the overlay
+        reloadOverlay.classList.remove('show');
+        
+        // Reset progress bar
+        if (progressBar) {
+          progressBar.style.width = '0%';
+        }
+        
+        // Reset reload button
+        if (reloadBtn) {
+          reloadBtn.disabled = false;
+          reloadBtn.innerHTML = '<i class="fas fa-sync-alt"></i> <span class="btn-text">Reload</span>';
+        }
+        
+        // Reload data from Firebase
+        loadData();
+        
+        // Show success message
+        showToast('System reloaded successfully!', 'success');
+        
+      }, 3000); // 3 seconds animation duration
+    }
+    
+    // Function to show reload animation and return to login
+    function showReloadToLogin() {
+      console.log('🔄 Starting 3D reload animation to login...');
+      
+      // Show the overlay
+      reloadOverlay.classList.add('show');
+      
+      // Update text for login reload
+      const reloadText = reloadOverlay.querySelector('.reload-text');
+      const reloadSubtext = reloadOverlay.querySelector('.reload-subtext');
+      
+      if (reloadText) reloadText.textContent = 'Returning to Login';
+      if (reloadSubtext) reloadSubtext.textContent = 'Please wait while we redirect you';
+      
+      // Simulate reload process
+      setTimeout(() => {
+        console.log('🔄 Reload animation completed, showing login...');
+        
+        // Hide the overlay
+        reloadOverlay.classList.remove('show');
+        
+        // Reset text
+        if (reloadText) reloadText.textContent = 'Reloading System';
+        if (reloadSubtext) reloadSubtext.textContent = 'Please wait while we refresh your session';
+        
+        // Sign out and show login
+        auth.signOut().then(() => {
+          showLogin();
+          showToast('Returned to login screen', 'success');
+        }).catch((error) => {
+          console.error('Error signing out:', error);
+          showToast('Error returning to login', 'error');
+        });
+        
+      }, 3000); // 3 seconds animation duration
+    }
+    
+    // Add keyboard shortcut for reload (Ctrl+R or Cmd+R)
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'r' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        if (auth.currentUser) {
+          showReloadAnimation();
+        } else {
+          showToast('Please log in first', 'warning');
+        }
+      }
+    });
+    
+    // Add reload to login functionality (Ctrl+Shift+R or Cmd+Shift+R)
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'R' && (e.ctrlKey || e.metaKey) && e.shiftKey) {
+        e.preventDefault();
+        showReloadToLogin();
+      }
+    });
+    
+    // Expose reload functions to window for global access
+    window.showReloadAnimation = showReloadAnimation;
+    window.showReloadToLogin = showReloadToLogin;
+    
+    // Add swipe gesture for mobile reload (swipe down from top)
+    let touchStartY = 0;
+    let touchEndY = 0;
+    
+    document.addEventListener('touchstart', (e) => {
+      touchStartY = e.changedTouches[0].screenY;
+    });
+    
+    document.addEventListener('touchend', (e) => {
+      touchEndY = e.changedTouches[0].screenY;
+      handleSwipe();
+    });
+    
+    function handleSwipe() {
+      const swipeThreshold = 100;
+      const swipeDistance = touchStartY - touchEndY;
+      
+      // Swipe down from top (pull to refresh style)
+      if (swipeDistance > swipeThreshold && touchStartY < 100) {
+        if (auth.currentUser) {
+          showReloadAnimation();
+        } else {
+          showToast('Please log in first', 'warning');
+        }
+      }
+    }
+    
+    // Show initial reload animation on first load (optional)
+    let hasShownInitialAnimation = false;
+    
+    function showInitialAnimation() {
+      if (!hasShownInitialAnimation && auth.currentUser) {
+        hasShownInitialAnimation = true;
+        setTimeout(() => {
+          showReloadAnimation();
+        }, 1000); // Show after 1 second
+      }
+    }
+    
+    // Call initial animation when user is authenticated
+    if (auth.currentUser) {
+      showInitialAnimation();
+    }
+    
+    // Add context menu for reload options
+    document.addEventListener('contextmenu', (e) => {
+      // Only show context menu on the app area
+      if (e.target.closest('#app')) {
+        e.preventDefault();
+        
+        // Create context menu
+        const contextMenu = document.createElement('div');
+        contextMenu.style.cssText = `
+          position: fixed;
+          top: ${e.clientY}px;
+          left: ${e.clientX}px;
+          background: rgba(15, 23, 42, 0.95);
+          backdrop-filter: blur(20px);
+          border: 1px solid rgba(255, 255, 255, 0.12);
+          border-radius: 12px;
+          padding: 8px;
+          z-index: 10000;
+          box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+          min-width: 200px;
+        `;
+        
+        contextMenu.innerHTML = `
+          <div style="padding: 8px 12px; color: var(--text); font-size: 12px; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 4px;">
+            <i class="fas fa-sync-alt"></i> Reload Options
+          </div>
+          <button onclick="showReloadAnimation(); this.closest('.context-menu').remove();" style="width: 100%; text-align: left; padding: 8px 12px; background: none; border: none; color: var(--text); cursor: pointer; border-radius: 6px; transition: all 0.3s ease;">
+            <i class="fas fa-sync"></i> Reload System
+          </button>
+          <button onclick="showReloadToLogin(); this.closest('.context-menu').remove();" style="width: 100%; text-align: left; padding: 8px 12px; background: none; border: none; color: var(--text); cursor: pointer; border-radius: 6px; transition: all 0.3s ease;">
+            <i class="fas fa-sign-in-alt"></i> Return to Login
+          </button>
+        `;
+        
+        // Add hover effects
+        const buttons = contextMenu.querySelectorAll('button');
+        buttons.forEach(btn => {
+          btn.addEventListener('mouseenter', () => {
+            btn.style.background = 'rgba(34, 211, 238, 0.1)';
+          });
+          btn.addEventListener('mouseleave', () => {
+            btn.style.background = 'none';
+          });
+        });
+        
+        contextMenu.className = 'context-menu';
+        document.body.appendChild(contextMenu);
+        
+        // Remove context menu when clicking outside
+        const removeContextMenu = () => {
+          if (contextMenu.parentNode) {
+            contextMenu.parentNode.removeChild(contextMenu);
+          }
+          document.removeEventListener('click', removeContextMenu);
+        };
+        
+        setTimeout(() => {
+          document.addEventListener('click', removeContextMenu);
+        }, 100);
+      }
+    });
+    
     // Keyboard shortcuts
     document.addEventListener('keydown',(e)=>{
       if(e.key==='n' && (e.ctrlKey||e.metaKey)){ e.preventDefault(); openItemModal(); }
