@@ -1500,6 +1500,257 @@
       align-items: start;
     }
     
+    /* Supplier Modal Styles */
+    .supplier-list {
+      display: grid;
+      gap: 16px;
+    }
+    
+    .supplier-item {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 20px;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .supplier-item:hover {
+      background: rgba(30, 41, 59, 0.8);
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+    }
+    
+    .supplier-info h4 {
+      margin: 0 0 8px 0;
+      color: var(--brand);
+      font-size: 18px;
+      font-weight: 600;
+    }
+    
+    .supplier-info p {
+      margin: 0;
+      color: var(--sub);
+      font-size: 14px;
+    }
+    
+    .supplier-count {
+      background: var(--gradient);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    
+    .supplier-products {
+      display: block;
+    }
+    
+    .supplier-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .supplier-header h3 {
+      margin: 0;
+      color: var(--text);
+      font-size: 20px;
+      font-weight: 600;
+    }
+    
+    .supplier-products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    
+    .supplier-product-card {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 16px;
+      transition: var(--transition);
+    }
+    
+    .supplier-product-card:hover {
+      background: rgba(30, 41, 59, 0.8);
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+    }
+    
+    .supplier-product-card h4 {
+      margin: 0 0 8px 0;
+      color: var(--text);
+      font-size: 16px;
+      font-weight: 600;
+    }
+    
+    .supplier-product-card p {
+      margin: 0 0 12px 0;
+      color: var(--sub);
+      font-size: 14px;
+    }
+    
+    .supplier-product-stats {
+      display: flex;
+      gap: 12px;
+      margin-top: 12px;
+    }
+    
+    .supplier-product-stat {
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 12px;
+      color: var(--sub);
+    }
+    
+    .hidden {
+      display: none !important;
+    }
+    
+    /* Quick Purchase Form Styles */
+    .quick-purchase-form {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    
+    .form-section {
+      background: rgba(15, 23, 42, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 20px;
+    }
+    
+    .form-section h4 {
+      margin: 0 0 16px 0;
+      color: var(--brand);
+      font-size: 16px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .form-section h4 i {
+      color: var(--brand);
+    }
+    
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    
+    .form-input, .form-select, .form-textarea {
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--text);
+      padding: 14px 16px;
+      border-radius: 14px;
+      outline: none;
+      font-family: inherit;
+      font-size: 14px;
+      transition: var(--transition);
+      backdrop-filter: blur(10px);
+      width: 100%;
+    }
+    
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: var(--brand);
+      box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.2);
+      background: rgba(15, 23, 42, 0.9);
+      transform: translateY(-1px);
+    }
+    
+    .form-textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+    
+    .form-actions {
+      display: flex;
+      justify-content: center;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    
+    .form-actions .btn {
+      min-width: 200px;
+      padding: 16px 24px;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    
+    /* Item Form Styles */
+    .item-form {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    
+    .item-form .form-section {
+      background: rgba(15, 23, 42, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 20px;
+    }
+    
+    .item-form .form-section h4 {
+      margin: 0 0 16px 0;
+      color: var(--brand);
+      font-size: 16px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .item-form .form-section h4 i {
+      color: var(--brand);
+    }
+    
+    .item-form .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    
+    .item-form .control {
+      margin-bottom: 0;
+    }
+    
+    .item-form .control:last-child {
+      margin-bottom: 0;
+    }
+    
+    .item-form .form-actions {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    
+    .item-form .form-actions .btn {
+      min-width: 180px;
+      padding: 16px 24px;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    
     .detail-info-panel {
       background: rgba(15, 23, 42, 0.6);
       border: 1px solid rgba(255, 255, 255, 0.1);
@@ -1710,7 +1961,7 @@
       }
       
       .grid {
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(2, 1fr);
         gap: 16px;
       }
       
@@ -1768,6 +2019,129 @@
       input, select, textarea {
         padding: 12px 14px;
         font-size: 16px;
+      }
+      
+      /* Hide email on mobile */
+      .user-email-mobile {
+        display: none;
+      }
+      
+      /* 2-column grid for action buttons on mobile */
+      .controls .row.wrap {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+      
+      .controls .row.wrap .btn {
+        width: 100%;
+        justify-content: center;
+        min-height: 44px;
+      }
+      
+
+      
+      /* Improved header for mobile */
+      .header {
+        padding: 16px 20px;
+        flex-direction: column;
+        gap: 16px;
+        align-items: stretch;
+      }
+      
+      .brand {
+        justify-content: center;
+      }
+      
+      .header-actions {
+        justify-content: center;
+        gap: 12px;
+      }
+      
+
+      
+      /* Remove reset button on mobile */
+      .reset-btn-mobile {
+        display: none;
+      }
+      
+      /* Supplier modal mobile styles */
+      .supplier-products-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+      }
+      
+      .supplier-product-card {
+        padding: 14px;
+      }
+      
+      .supplier-product-card h4 {
+        font-size: 14px;
+      }
+      
+      .supplier-product-card p {
+        font-size: 12px;
+        margin-bottom: 10px;
+      }
+      
+      .supplier-product-stats {
+        gap: 8px;
+        margin-top: 10px;
+      }
+      
+      .supplier-product-stat {
+        padding: 6px 10px;
+        font-size: 11px;
+      }
+      
+      .supplier-header {
+        flex-direction: column;
+        gap: 12px;
+        align-items: stretch;
+      }
+      
+      .supplier-header .btn {
+        width: 100%;
+        justify-content: center;
+      }
+      
+      /* Quick Purchase form mobile styles */
+      .form-row {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+      
+      .form-section {
+        padding: 16px;
+      }
+      
+      .form-actions .btn {
+        min-width: auto;
+        width: 100%;
+        padding: 14px 20px;
+        font-size: 15px;
+      }
+      
+      /* Item form mobile styles */
+      .item-form .form-row {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+      
+      .item-form .form-section {
+        padding: 16px;
+      }
+      
+      .item-form .form-actions {
+        flex-direction: column;
+        gap: 12px;
+      }
+      
+      .item-form .form-actions .btn {
+        min-width: auto;
+        width: 100%;
+        padding: 14px 20px;
+        font-size: 15px;
       }
     }
     
@@ -1886,8 +2260,46 @@
       }
       
       .btn-sm {
-        padding: 6px 8px;
+        padding: 8px 10px;
         font-size: 11px;
+      }
+      
+      /* Form mobile styles for 640px */
+      .form-row {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+      
+      .form-section {
+        padding: 16px;
+      }
+      
+      .form-actions .btn {
+        min-width: auto;
+        width: 100%;
+        padding: 14px 20px;
+        font-size: 15px;
+      }
+      
+      .item-form .form-row {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+      
+      .item-form .form-section {
+        padding: 16px;
+      }
+      
+      .item-form .form-actions {
+        flex-direction: column;
+        gap: 12px;
+      }
+      
+      .item-form .form-actions .btn {
+        min-width: auto;
+        width: 100%;
+        padding: 14px 20px;
+        font-size: 15px;
       }
     }
     
@@ -1976,7 +2388,7 @@
       }
       
       .btn-sm {
-        padding: 4px 6px;
+        padding: 6px 8px;
         font-size: 10px;
       }
       
@@ -2047,6 +2459,44 @@
       .login-btn {
         padding: 14px;
         font-size: 16px;
+      }
+      
+      /* Form mobile styles for 480px */
+      .form-row {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+      
+      .form-section {
+        padding: 14px;
+      }
+      
+      .form-actions .btn {
+        min-width: auto;
+        width: 100%;
+        padding: 12px 18px;
+        font-size: 14px;
+      }
+      
+      .item-form .form-row {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+      
+      .item-form .form-section {
+        padding: 14px;
+      }
+      
+      .item-form .form-actions {
+        flex-direction: column;
+        gap: 10px;
+      }
+      
+      .item-form .form-actions .btn {
+        min-width: auto;
+        width: 100%;
+        padding: 12px 18px;
+        font-size: 14px;
       }
     }
     
@@ -2127,7 +2577,7 @@
       }
       
       .btn-sm {
-        padding: 3px 5px;
+        padding: 4px 6px;
         font-size: 9px;
       }
       
@@ -2164,6 +2614,44 @@
       
       .modal header {
         padding: 8px 12px;
+      }
+      
+      /* Form mobile styles for 360px */
+      .form-row {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+      
+      .form-section {
+        padding: 12px;
+      }
+      
+      .form-actions .btn {
+        min-width: auto;
+        width: 100%;
+        padding: 10px 16px;
+        font-size: 13px;
+      }
+      
+      .item-form .form-row {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+      
+      .item-form .form-section {
+        padding: 12px;
+      }
+      
+      .item-form .form-actions {
+        flex-direction: column;
+        gap: 8px;
+      }
+      
+      .item-form .form-actions .btn {
+        min-width: auto;
+        width: 100%;
+        padding: 10px 16px;
+        font-size: 13px;
       }
     }
     
@@ -2416,8 +2904,8 @@
         </div>
       </div>
       
-      <div style="display: flex; align-items: center; gap: 15px;">
-        <span class="muted" id="userEmail"></span>
+      <div class="header-actions" style="display: flex; align-items: center; gap: 15px;">
+        <span class="muted user-email-mobile" id="userEmail"></span>
         <button class="btn bad" id="logoutBtn">
           <i class="fas fa-sign-out-alt"></i> 
         </button>
@@ -2489,7 +2977,7 @@
                 <i class="fas fa-copy"></i>
                 <span>Bulk Add</span>
               </button>
-              <button class="btn bad" id="resetBtn">
+              <button class="btn bad reset-btn-mobile" id="resetBtn">
                 <i class="fas fa-trash"></i>
                 <span>Reset</span>
               </button>
@@ -2508,6 +2996,10 @@
             <button class="btn brand" id="quickPurchaseBtn">
               <i class="fas fa-bolt"></i>
               <span>Quick Purchase</span>
+            </button>
+            <button class="btn" id="supplierBtn">
+              <i class="fas fa-truck"></i>
+              <span>Suppliers</span>
             </button>
             <button class="btn" id="statsBtn">
               <i class="fas fa-chart-bar"></i>
@@ -2585,50 +3077,61 @@
         </button>
       </header>
       <div class="body">
-        <div class="row wrap">
-          <div class="control" style="flex:1;min-width:220px">
-            <label><i class="fas fa-tag"></i> Item Name</label>
-            <input id="f_name" placeholder="Example: SS Bowl 12cm" />
+        <div class="item-form">
+          <div class="form-section">
+            <h4><i class="fas fa-info-circle"></i> Basic Information</h4>
+            <div class="form-row">
+              <div class="control">
+                <label for="f_name"><i class="fas fa-tag"></i> Item Name</label>
+                <input id="f_name" placeholder="Example: SS Bowl 12cm" class="form-input" />
+              </div>
+              <div class="control">
+                <label for="f_sku"><i class="fas fa-barcode"></i> SKU / Code</label>
+                <input id="f_sku" placeholder="BW-12" class="form-input" />
+              </div>
+            </div>
           </div>
-          <div class="control" style="width:180px">
-            <label><i class="fas fa-barcode"></i> SKU / Code</label>
-            <input id="f_sku" placeholder="BW-12" />
+          
+          <div class="form-section">
+            <h4><i class="fas fa-truck"></i> Supplier & Category</h4>
+            <div class="form-row">
+              <div class="control">
+                <label for="f_supplier"><i class="fas fa-truck"></i> Supplier</label>
+                <input id="f_supplier" placeholder="ABC Metals" class="form-input" />
+              </div>
+              <div class="control">
+                <label for="f_category"><i class="fas fa-folder"></i> Category</label>
+                <input id="f_category" placeholder="Kitchen" class="form-input" />
+              </div>
+            </div>
           </div>
-        </div>
-        
-        <div class="row wrap mt-2">
-          <div class="control" style="flex:1;min-width:200px">
-            <label><i class="fas fa-truck"></i> Supplier</label>
-            <input id="f_supplier" placeholder="ABC Metals" />
+          
+          <div class="form-section">
+            <h4><i class="fas fa-boxes"></i> Quantity & Photo</h4>
+            <div class="form-row">
+              <div class="control">
+                <label for="f_openQty"><i class="fas fa-box-open"></i> Opening Qty</label>
+                <input id="f_openQty" type="number" min="0" value="0" class="form-input" />
+              </div>
+              <div class="control">
+                <label for="f_unit"><i class="fas fa-balance-scale"></i> Unit</label>
+                <input id="f_unit" placeholder="pcs" value="pcs" class="form-input" />
+              </div>
+            </div>
+            <div class="control">
+              <label for="f_photo"><i class="fas fa-camera"></i> Photo</label>
+              <input id="f_photo" type="file" accept="image/*" class="form-input" />
+            </div>
           </div>
-          <div class="control" style="width:160px">
-            <label><i class="fas fa-folder"></i> Category</label>
-            <input id="f_category" placeholder="Kitchen" />
+          
+          <div class="form-actions">
+            <button class="btn brand" id="saveItemBtn">
+              <i class="fas fa-save"></i> Save Item
+            </button>
+            <button class="btn" id="saveItemAddMoreBtn">
+              <i class="fas fa-save"></i> Save & Add Another
+            </button>
           </div>
-        </div>
-        
-        <div class="row wrap mt-2">
-          <div class="control" style="width:160px">
-            <label><i class="fas fa-box-open"></i> Opening Qty</label>
-            <input id="f_openQty" type="number" min="0" value="0" />
-          </div>
-          <div class="control" style="width:180px">
-            <label><i class="fas fa-balance-scale"></i> Unit</label>
-            <input id="f_unit" placeholder="pcs" value="pcs" />
-          </div>
-          <div class="control" style="flex:1;min-width:240px">
-            <label><i class="fas fa-camera"></i> Photo</label>
-            <input id="f_photo" type="file" accept="image/*" />
-          </div>
-        </div>
-        
-        <div class="row wrap mt-3">
-          <button class="btn brand" id="saveItemBtn">
-            <i class="fas fa-save"></i> Save Item
-          </button>
-          <button class="btn" id="saveItemAddMoreBtn">
-            <i class="fas fa-save"></i> Save & Add Another
-          </button>
         </div>
       </div>
     </div>
@@ -2659,28 +3162,66 @@
         </button>
       </header>
       <div class="body">
-        <div class="row wrap">
-          <div class="control" style="flex:1;min-width:260px">
-            <label><i class="fas fa-cube"></i> Choose Item</label>
-            <select id="p_item"></select>
+        <div class="quick-purchase-form">
+          <div class="form-section">
+            <h4><i class="fas fa-cube"></i> Product Selection</h4>
+            <div class="control">
+              <label for="p_item">Choose Item</label>
+              <select id="p_item" class="form-select"></select>
+            </div>
           </div>
-          <div class="control" style="width:150px">
-            <label><i class="fas fa-hashtag"></i> Quantity</label>
-            <input id="p_qty" type="number" min="1" value="1" />
+          
+          <div class="form-section">
+            <h4><i class="fas fa-info-circle"></i> Purchase Details</h4>
+            <div class="form-row">
+              <div class="control">
+                <label for="p_qty">Quantity</label>
+                <input id="p_qty" type="number" min="1" value="1" class="form-input" />
+              </div>
+              <div class="control">
+                <label for="p_date">Purchase Date</label>
+                <input id="p_date" type="date" class="form-input" />
+              </div>
+            </div>
+            <div class="control">
+              <label for="p_note">Notes (Optional)</label>
+              <textarea id="p_note" placeholder="Add any additional notes about this purchase..." class="form-textarea"></textarea>
+            </div>
           </div>
-          <div class="control" style="width:180px">
-            <label><i class="fas fa-calendar"></i> Purchase Date</label>
-            <input id="p_date" type="date" />
-          </div>
-          <div class="control" style="width:180px">
-            <label><i class="fas fa-sticky-note"></i> Notes</label>
-            <input id="p_note" placeholder="Optional notes" />
+          
+          <div class="form-actions">
+            <button class="btn brand" id="p_save">
+              <i class="fas fa-check"></i> Add Purchase
+            </button>
           </div>
         </div>
-        <div class="row wrap" style="margin-top:10px">
-          <button class="btn brand" id="p_save">
-            <i class="fas fa-check"></i> Add Purchase
-          </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Suppliers -->
+  <div class="modal-backdrop" id="supplierModalWrap">
+    <div class="modal">
+      <header>
+        <strong><i class="fas fa-truck"></i> Suppliers</strong>
+        <button class="btn" onclick="closeSupplier()">
+          <i class="fas fa-times"></i> Close
+        </button>
+      </header>
+      <div class="body">
+        <div id="supplierList" class="supplier-list">
+          <!-- Supplier list will be populated here -->
+        </div>
+        <div id="supplierProducts" class="supplier-products hidden">
+          <div class="supplier-header">
+            <button class="btn" onclick="showSupplierList()">
+              <i class="fas fa-arrow-left"></i> Back to Suppliers
+            </button>
+            <h3 id="currentSupplierName">Supplier Products</h3>
+          </div>
+          <div id="supplierProductsList" class="supplier-products-grid">
+            <!-- Products will be populated here -->
+          </div>
         </div>
       </div>
     </div>
@@ -3182,6 +3723,7 @@
     let itemModalWrap, itemModalTitle, f_name, f_sku, f_supplier, f_category, f_openQty, f_unit, f_photo;
     let detailModalWrap, detailTitle, detailBody;
     let purchaseModalWrap, p_item, p_qty, p_date, p_note;
+    let supplierModalWrap;
     let editingId = null;
 
     // Initialize DOM elements when they're ready
@@ -3220,6 +3762,8 @@
       p_qty = document.getElementById('p_qty');
       p_date = document.getElementById('p_date');
       p_note = document.getElementById('p_note');
+
+      supplierModalWrap = document.getElementById('supplierModalWrap');
 
       console.log('✅ DOM elements initialized');
     }
@@ -3562,6 +4106,97 @@
     
     function openPurchaseFor(itemId){ openPurchase(); p_item.value=itemId; }
     function closePurchase(){ purchaseModalWrap.style.display='none'; }
+    
+    // Supplier Modal Functions
+    function openSupplier(){
+      const supplierList = document.getElementById('supplierList');
+      const supplierProducts = document.getElementById('supplierProducts');
+      
+      // Get unique suppliers and their product counts
+      const suppliers = new Map();
+      state.items.forEach(item => {
+        if (item.supplier && item.supplier.trim()) {
+          const supplierName = item.supplier.trim();
+          if (!suppliers.has(supplierName)) {
+            suppliers.set(supplierName, []);
+          }
+          suppliers.get(supplierName).push(item);
+        }
+      });
+      
+      // Create supplier list HTML
+      const supplierHTML = Array.from(suppliers.entries()).map(([name, items]) => `
+        <div class="supplier-item" onclick="showSupplierProducts('${escapeHtml(name)}')">
+          <div class="supplier-info">
+            <h4>${escapeHtml(name)}</h4>
+            <p>${items.length} product${items.length !== 1 ? 's' : ''}</p>
+          </div>
+          <div class="supplier-count">
+            ${items.length}
+          </div>
+        </div>
+      `).join('');
+      
+      supplierList.innerHTML = supplierHTML || '<div class="empty"><i class="fas fa-truck"></i> No suppliers found</div>';
+      
+      // Show supplier list
+      supplierList.classList.remove('hidden');
+      supplierProducts.classList.add('hidden');
+      
+      supplierModalWrap.style.display='flex';
+    }
+    
+    function showSupplierProducts(supplierName){
+      const supplierList = document.getElementById('supplierList');
+      const supplierProducts = document.getElementById('supplierProducts');
+      const currentSupplierName = document.getElementById('currentSupplierName');
+      const supplierProductsList = document.getElementById('supplierProductsList');
+      
+      // Get products for this supplier
+      const supplierItems = state.items.filter(item => 
+        item.supplier && item.supplier.trim() === supplierName
+      );
+      
+      currentSupplierName.textContent = `${supplierName} Products`;
+      
+      // Create products grid HTML
+      const productsHTML = supplierItems.map(item => {
+        const qty = itemTotalQty(item.id);
+        const last = lastPurchaseDate(item.id);
+        return `
+          <div class="supplier-product-card">
+            <h4>${escapeHtml(item.name)}</h4>
+            <p>SKU: ${escapeHtml(item.sku || '-')} • ${escapeHtml(item.category || '-')}</p>
+            <div class="supplier-product-stats">
+              <span class="supplier-product-stat">
+                <i class="fas fa-layer-group"></i> Qty: ${qty}
+              </span>
+              <span class="supplier-product-stat">
+                <i class="fas fa-calendar"></i> ${last ? fmtDate(last) : '–'}
+              </span>
+            </div>
+          </div>
+        `;
+      }).join('');
+      
+      supplierProductsList.innerHTML = productsHTML || '<div class="empty"><i class="fas fa-box-open"></i> No products found</div>';
+      
+      // Show products, hide supplier list
+      supplierList.classList.add('hidden');
+      supplierProducts.classList.remove('hidden');
+    }
+    
+    function showSupplierList(){
+      const supplierList = document.getElementById('supplierList');
+      const supplierProducts = document.getElementById('supplierProducts');
+      
+      supplierList.classList.remove('hidden');
+      supplierProducts.classList.add('hidden');
+    }
+    
+    function closeSupplier(){
+      supplierModalWrap.style.display='none';
+    }
 
     async function addPurchase(){
       if(!p_item.value){ showToast('Please choose an item', 'error'); return; }
@@ -3661,6 +4296,7 @@
     document.getElementById('addFirstItemBtn').onclick = ()=> openItemModal();
 
     document.getElementById('quickPurchaseBtn').onclick = openPurchase;
+    document.getElementById('supplierBtn').onclick = openSupplier;
     document.getElementById('p_save').onclick = addPurchase;
 
     document.getElementById('importBtn').onclick = ()=> document.getElementById('importFile').click();
@@ -3716,7 +4352,7 @@
     if (viewMode) viewMode.onchange = render;
 
     // Close modals on backdrop click
-    [itemModalWrap, detailModalWrap, purchaseModalWrap].forEach(el=> {
+    [itemModalWrap, detailModalWrap, purchaseModalWrap, supplierModalWrap].forEach(el=> {
       if (el) {
         el.addEventListener('click', (e)=>{ 
           if(e.target===el){ 
@@ -3749,6 +4385,9 @@
     window.deleteItem = deleteItem;
     window.closeItemModal = closeItemModal;
     window.closePurchase = closePurchase;
+    window.closeSupplier = closeSupplier;
+    window.showSupplierProducts = showSupplierProducts;
+    window.showSupplierList = showSupplierList;
 
     // Keyboard shortcuts
     document.addEventListener('keydown',(e)=>{
@@ -3758,6 +4397,7 @@
         if(itemModalWrap && itemModalWrap.style.display==='flex') closeItemModal();
         if(detailModalWrap && detailModalWrap.style.display==='flex') closeDetail();
         if(purchaseModalWrap && purchaseModalWrap.style.display==='flex') closePurchase();
+        if(supplierModalWrap && supplierModalWrap.style.display==='flex') closeSupplier();
       }
     });
   </script>
