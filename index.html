@@ -769,6 +769,22 @@
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 20px;
     }
+
+    /* Compact density mode */
+    body.density-compact .header { padding: 14px 20px; }
+    body.density-compact .panel { padding: 16px; margin-bottom: 16px; }
+    body.density-compact .controls { gap: 12px; }
+    body.density-compact .btn { padding: 10px 12px; }
+    body.density-compact .btn-icon { width: 32px; height: 32px; }
+    body.density-compact .grid { gap: 12px; }
+    body.density-compact .card-body { padding: 12px; }
+    body.density-compact .title { font-size: 14px; height: 2.4em; }
+    body.density-compact .sub { font-size: 12px; margin-bottom: 6px; }
+    body.density-compact .chip { padding: 4px 8px; font-size: 10px; }
+    body.density-compact .footer { gap: 6px; }
+    body.density-compact .footer .btn { padding: 8px 10px; }
+    body.density-compact .table-container { margin: 16px 0; }
+    body.density-compact th, body.density-compact td { padding: 10px 12px; }
     
     /* Responsive grid system */
     @media (max-width: 1200px) {
@@ -3175,8 +3191,8 @@
   <div class="login-container" id="loginPage">
     <div class="login-card">
       <div class="login-logo">
-        <img src="KHODAL.png" alt="Khodal Enterprise">
-        <h1>Khodal Enterprise</h1>
+        <img id="loginLogo" src="KHODAL.png" alt="Khodal Enterprise">
+        <h1 id="loginTitle">Khodal Enterprise</h1>
         <p>Inventory Management System</p>
       </div>
       
@@ -3222,9 +3238,9 @@
   <div class="login-container hidden" id="registerPage">
     <div class="login-card">
       <div class="login-logo">
-        <img src="KHODAL.png" alt="Khodal Enterprise">
-        <h1>Create Account</h1>
-        <p>Join Khodal Enterprise</p>
+        <img id="registerLogo" src="KHODAL.png" alt="Khodal Enterprise">
+        <h1 id="registerTitle">Create Account</h1>
+        <p id="registerSubtitle">Join Khodal Enterprise</p>
       </div>
       
       <div class="login-error hidden" id="registerError">
@@ -3314,16 +3330,23 @@
     <header class="header">
       <div class="brand">
         <div class="logo">
-          <img src="KHODAL.png" alt="Khodal Enterprise">
+          <img id="dashboardLogo" src="KHODAL.png" alt="Khodal Enterprise">
         </div>
         <div class="brand-text">
-          <h1>Khodal Enterprise</h1>
+          <h1 id="dashboardName">Khodal Enterprise</h1>
           <div class="muted">Inventory Management System</div>
         </div>
       </div>
       
       <div class="header-actions" style="display: flex; align-items: center; gap: 15px;">
         <span class="muted user-email-mobile" id="userEmail"></span>
+        <button class="btn" id="densityBtn" title="Toggle compact density">
+          <i class="fas fa-compress"></i>
+        </button>
+        <button class="btn" id="profileBtn">
+          <i class="fas fa-user"></i>
+          
+        </button>
         <button class="btn bad" id="logoutBtn">
           <i class="fas fa-sign-out-alt"></i>
           
@@ -3771,6 +3794,7 @@
     const registerErrorMessage = document.getElementById('registerErrorMessage');
     const logoutBtn = document.getElementById('logoutBtn');
     const userEmail = document.getElementById('userEmail');
+    const densityBtn = document.getElementById('densityBtn');
     
     // Show/hide functions for auth UI
     function showLogin() {
@@ -3790,6 +3814,11 @@
       registerPage.classList.add('hidden');
       app.classList.add('show');
       userEmail.textContent = auth.currentUser.email;
+      // Apply saved density preference
+      try {
+        const d = localStorage.getItem('density');
+        if (d === 'compact') document.body.classList.add('density-compact');
+      } catch(_e) {}
       
       // Initialize DOM elements if not already done
       if (!listEl) {
@@ -4038,6 +4067,22 @@
             lastLogin: new Date()
           });
         }
+
+        // Apply brand settings to dashboard and auth screens if available
+        try {
+          const brandData = (await db.collection('users').doc(userId).get()).data() || {};
+          const name = brandData.brandName || 'Khodal Enterprise';
+          const logo = brandData.brandLogo || 'KHODAL.png';
+          const nameEl = document.getElementById('dashboardName');
+          const logoEl = document.getElementById('dashboardLogo');
+          if (nameEl) nameEl.textContent = name;
+          if (logoEl && logo) logoEl.src = logo;
+          const loginTitle = document.getElementById('loginTitle'); if (loginTitle) loginTitle.textContent = name;
+          const registerSubtitle = document.getElementById('registerSubtitle'); if (registerSubtitle) registerSubtitle.textContent = `Join ${name}`;
+          const loginLogo = document.getElementById('loginLogo'); if (loginLogo && logo) loginLogo.src = logo;
+          const registerLogo = document.getElementById('registerLogo'); if (registerLogo && logo) registerLogo.src = logo;
+          try { localStorage.setItem('brandName', name); localStorage.setItem('brandLogo', logo); } catch(_e) {}
+        } catch(brandErr){ console.warn('Brand read failed', brandErr); }
         
         // Load items
         console.log('Loading items...');
@@ -4222,6 +4267,21 @@
 
     // Initialize DOM elements when page loads
     document.addEventListener('DOMContentLoaded', function() {
+      // Apply brand from localStorage on first paint (before auth)
+      try {
+        const lsName = localStorage.getItem('brandName');
+        const lsLogo = localStorage.getItem('brandLogo');
+        if (lsName) {
+          const loginTitle = document.getElementById('loginTitle'); if (loginTitle) loginTitle.textContent = lsName;
+          const registerSubtitle = document.getElementById('registerSubtitle'); if (registerSubtitle) registerSubtitle.textContent = `Join ${lsName}`;
+          const dashboardName = document.getElementById('dashboardName'); if (dashboardName) dashboardName.textContent = lsName;
+        }
+        if (lsLogo) {
+          const loginLogo = document.getElementById('loginLogo'); if (loginLogo) loginLogo.src = lsLogo;
+          const registerLogo = document.getElementById('registerLogo'); if (registerLogo) registerLogo.src = lsLogo;
+          const dashboardLogo = document.getElementById('dashboardLogo'); if (dashboardLogo) dashboardLogo.src = lsLogo;
+        }
+      } catch(_e) {}
       console.log('🔄 DOM loaded, initializing elements...');
       initializeDOMElements();
       
@@ -4774,6 +4834,7 @@
     document.getElementById('quickPurchaseBtn').onclick = openPurchase;
     document.getElementById('supplierBtn').onclick = openSupplier;
     document.getElementById('p_save').onclick = addPurchase;
+    document.getElementById('profileBtn').onclick = () => { window.location.href = 'profile.html'; };
 
     document.getElementById('importBtn').onclick = ()=> document.getElementById('importFile').click();
     document.getElementById('importFile').addEventListener('change', (e)=>{ const f = e.target.files[0]; if(f) importJSONFile(f); e.target.value=''; });
@@ -4784,6 +4845,13 @@
       const statsSection = document.getElementById('stats');
       statsSection.scrollIntoView({ behavior: 'smooth' });
     };
+    if (densityBtn) {
+      densityBtn.addEventListener('click', () => {
+        document.body.classList.toggle('density-compact');
+        const isCompact = document.body.classList.contains('density-compact');
+        try { localStorage.setItem('density', isCompact ? 'compact' : 'comfortable'); } catch(_e) {}
+      });
+    }
     
     // Reload button event listener
     const reloadBtn = document.getElementById('reloadBtn');

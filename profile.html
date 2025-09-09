@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Khodal Enterprise - Profile</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <style>
+    :root {
+      --bg: #0a0f1a;
+      --panel: #0f172a;
+      --text: #f1f5f9;
+      --sub: #94a3b8;
+      --brand: #06b6d4;
+      --accent: #8b5cf6;
+      --good: #10b981;
+      --bad: #ef4444;
+      --radius: 16px;
+      --radius-lg: 24px;
+      --transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+      --gradient: linear-gradient(135deg, var(--brand), var(--accent));
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: linear-gradient(135deg, var(--bg) 0%, #0f172a 50%, #1e293b 100%);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .card {
+      width: 100%;
+      max-width: 720px;
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      box-shadow: 0 12px 24px rgba(0,0,0,0.3);
+      backdrop-filter: blur(20px);
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .brand {
+      display: flex; align-items: center; gap: 12px;
+    }
+    .avatar {
+      width: 48px; height: 48px; border-radius: 12px; overflow: hidden; border: 2px solid rgba(255,255,255,0.12);
+      display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.06);
+    }
+    .avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .brand h1 {
+      margin: 0; font-size: 18px; font-weight: 800; background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .muted { color: var(--sub); font-size: 13px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; }
+    .panel { background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 18px; }
+    .panel h3 { margin-bottom: 12px; font-size: 14px; color: var(--sub); letter-spacing: .3px; }
+    .row { display: grid; grid-template-columns: 160px 1fr; align-items: center; gap: 10px; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .row:last-child { border-bottom: none; }
+    .label { color: var(--sub); font-size: 13px; }
+    .value { font-weight: 600; }
+    .value.compact { font-weight: 500; font-size: 12px; line-height: 1.25; overflow-wrap: anywhere; word-break: break-word; }
+    .actions { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+    .btn { cursor: pointer; padding: 12px 16px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.12); background: rgba(15,23,42,.8); color: var(--text); display: inline-flex; align-items: center; gap: 8px; transition: var(--transition); }
+    .btn:hover { transform: translateY(-1px); box-shadow: 0 6px 12px rgba(0,0,0,.25); }
+    .btn:focus-visible { outline: 2px solid rgba(6,182,212,.7); outline-offset: 2px; }
+    .btn.brand { background: var(--gradient); color: white; border: 1px solid rgba(6,182,212,.4); }
+    .btn.brand:hover { filter: brightness(1.05); }
+    .btn.bad { background: linear-gradient(180deg, rgba(248,113,113,.2), rgba(248,113,113,.08)); border: 1px solid rgba(248,113,113,.5); }
+    .btn.bad:hover { background: linear-gradient(180deg, rgba(248,113,113,.28), rgba(248,113,113,.12)); }
+    .toast { position: fixed; bottom: 20px; right: 20px; background: rgba(15,23,42,.95); border: 1px solid rgba(255,255,255,.12); border-radius: 14px; padding: 14px 18px; display: none; gap: 10px; align-items: center; z-index: 50; }
+    .toast.show { display: flex; }
+    @media (max-width: 640px) {
+      .grid { grid-template-columns: 1fr; }
+      .row { grid-template-columns: 120px 1fr; }
+      .actions .btn { width: 100%; justify-content: center; }
+      .card { padding: 22px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="header">
+      <div class="brand">
+        <div class="avatar"><img src="KHODAL.png" alt="Khodal Enterprise"></div>
+        <div>
+          <h1>Profile</h1>
+          <div class="muted">Khodal Enterprise</div>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn" id="backBtn"><i class="fas fa-arrow-left"></i> Back to Dashboard</button>
+        <button class="btn brand" id="changeBrandBtn"><i class="fas fa-pen"></i> Change Brand</button>
+        <button class="btn bad" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="panel">
+        <h3><i class="fas fa-id-card"></i> Account</h3>
+        <div class="row"><div class="label">Email</div><div class="value compact" id="v_email">—</div></div>
+        <div class="row"><div class="label">UID</div><div class="value compact" id="v_uid">—</div></div>
+        <div class="row"><div class="label">Created</div><div class="value" id="v_created">—</div></div>
+        <div class="row"><div class="label">Last Login</div><div class="value" id="v_last">—</div></div>
+      </div>
+      <div class="panel">
+        <h3><i class="fas fa-shield-alt"></i> Security</h3>
+        <div class="row"><div class="label">Password</div><div class="value">•••••••• <button class="btn" id="resetPwdBtn"><i class="fas fa-key"></i> Send reset link</button></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"><i class="fas fa-check-circle"></i><span id="toastMsg"></span></div>
+
+  <!-- Brand Modal -->
+  <div id="brandModal" style="display:none; position:fixed; inset:0; background:rgba(2,6,23,.7); backdrop-filter: blur(8px); align-items:center; justify-content:center; z-index:1000;">
+    <div style="width:100%; max-width:520px; background:rgba(15,23,42,.96); border:1px solid rgba(255,255,255,.12); border-radius:16px; overflow:hidden;">
+      <div style="display:flex; align-items:center; justify-content:space-between; padding:14px 16px; border-bottom:1px solid rgba(255,255,255,.08);">
+        <strong style="font-size:16px;">Change Brand</strong>
+        <button class="btn" id="brandCloseBtn"><i class="fas fa-times"></i> Close</button>
+      </div>
+      <div style="padding:16px; display:grid; gap:14px;">
+        <div>
+          <div class="label" style="margin-bottom:6px;">Dashboard Name</div>
+          <input id="brandNameInput" placeholder="e.g. Khodal Enterprise" style="width:100%; padding:12px 14px; background:rgba(15,23,42,.8); border:1px solid rgba(255,255,255,.12); color:var(--text); border-radius:12px;" />
+        </div>
+        <div>
+          <div class="label" style="margin-bottom:6px;">Logo URL</div>
+          <input id="brandLogoInput" placeholder="https://... or KHODAL.png" style="width:100%; padding:12px 14px; background:rgba(15,23,42,.8); border:1px solid rgba(255,255,255,.12); color:var(--text); border-radius:12px;" />
+          <div class="muted" style="margin-top:6px; font-size:12px;">Tip: You can use a full image URL or a local file name placed in the project folder.</div>
+        </div>
+        <div>
+          <div class="label" style="margin-bottom:6px;">Or Upload Logo</div>
+          <input id="brandLogoFile" type="file" accept="image/*" style="width:100%; padding:10px 12px; background:rgba(15,23,42,.8); border:1px solid rgba(255,255,255,.12); color:var(--text); border-radius:12px;" />
+          <div style="margin-top:10px; display:flex; align-items:center; gap:10px;">
+            <div class="avatar" style="width:56px;height:56px; border-radius:12px; overflow:hidden;">
+              <img id="brandLogoPreview" src="KHODAL.png" alt="Preview" style="width:100%; height:100%; object-fit:cover;" />
+            </div>
+            <div class="muted" style="font-size:12px;">Preview</div>
+          </div>
+        </div>
+        <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:6px;">
+          <button class="btn" id="brandCancelBtn"><i class="fas fa-times"></i> Cancel</button>
+          <button class="btn brand" id="brandSaveBtn"><i class="fas fa-save"></i> Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBU2QzQUSnL1xHACRziKBKgHaBqaFN5mwk",
+      authDomain: "khodal-enterprise-1b07d.firebaseapp.com",
+      projectId: "khodal-enterprise-1b07d",
+      storageBucket: "khodal-enterprise-1b07d.firebasestorage.app",
+      messagingSenderId: "905787790243",
+      appId: "1:905787790243:web:2c6696bdf26244a6950016",
+      measurementId: "G-DTGLD2ZJP0"
+    };
+    try { firebase.initializeApp(firebaseConfig); } catch(e) {}
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    function showToast(msg, type='success'){
+      const el = document.getElementById('toast');
+      document.getElementById('toastMsg').textContent = msg;
+      const icon = el.querySelector('i');
+      icon.className = type==='error' ? 'fas fa-exclamation-circle' : type==='warning' ? 'fas fa-exclamation-triangle' : 'fas fa-check-circle';
+      el.classList.add('show');
+      setTimeout(()=> el.classList.remove('show'), 2500);
+    }
+
+    function fmtDate(d){ return d ? new Date(d).toLocaleString('en-IN',{year:'numeric',month:'short',day:'2-digit', hour:'2-digit', minute:'2-digit'}) : '—'; }
+
+    document.getElementById('backBtn').onclick = () => { window.location.href = 'index.html'; };
+    document.getElementById('logoutBtn').onclick = async () => {
+      try { await auth.signOut(); window.location.href = 'index.html'; } catch(e){ showToast('Logout failed','error'); }
+    };
+    document.getElementById('changeBrandBtn').onclick = () => {
+      document.getElementById('brandModal').style.display = 'flex';
+    };
+    document.getElementById('brandCloseBtn').onclick = () => {
+      document.getElementById('brandModal').style.display = 'none';
+    };
+    document.getElementById('brandCancelBtn').onclick = () => {
+      document.getElementById('brandModal').style.display = 'none';
+    };
+    document.getElementById('resetPwdBtn').onclick = async () => {
+      const user = auth.currentUser;
+      if(!user || !user.email) return showToast('No user','error');
+      try { await auth.sendPasswordResetEmail(user.email); showToast('Reset email sent'); } catch(e){ showToast('Failed to send reset','error'); }
+    };
+
+    auth.onAuthStateChanged(async (user)=>{
+      if(!user){ window.location.href='index.html'; return; }
+      document.getElementById('v_email').textContent = user.email || '—';
+      document.getElementById('v_uid').textContent = user.uid || '—';
+      try {
+        const doc = await db.collection('users').doc(user.uid).get();
+        const data = doc.exists ? doc.data() : null;
+        document.getElementById('v_created').textContent = data && data.createdAt ? fmtDate(data.createdAt.toDate ? data.createdAt.toDate() : data.createdAt) : '—';
+        document.getElementById('v_last').textContent = data && data.lastLogin ? fmtDate(data.lastLogin.toDate ? data.lastLogin.toDate() : data.lastLogin) : '—';
+
+        // Prefill modal with existing brand values
+        document.getElementById('brandNameInput').value = (data && data.brandName) || 'Khodal Enterprise';
+        document.getElementById('brandLogoInput').value = (data && data.brandLogo) || 'KHODAL.png';
+        const preview = document.getElementById('brandLogoPreview');
+        if(preview){ preview.src = (data && data.brandLogo) || 'KHODAL.png'; }
+
+        // Apply to profile header immediately
+        const headerName = document.querySelector('.brand .muted');
+        if(headerName){ headerName.textContent = (data && data.brandName) || 'Khodal Enterprise'; }
+        const headerLogo = document.querySelector('.avatar img');
+        if(headerLogo && data && data.brandLogo){ headerLogo.src = data.brandLogo; }
+
+        // Handle file preview
+        const f = document.getElementById('brandLogoFile');
+        f.onchange = async (e)=>{
+          const file = e.target.files && e.target.files[0]; if(!file) return;
+          const reader = new FileReader();
+          reader.onload = ()=>{ if(preview) preview.src = reader.result; };
+          reader.readAsDataURL(file);
+        };
+
+        // Save handler
+        document.getElementById('brandSaveBtn').onclick = async () => {
+          const brandName = document.getElementById('brandNameInput').value.trim();
+          const brandLogo = document.getElementById('brandLogoInput').value.trim();
+          const fileInput = document.getElementById('brandLogoFile');
+          if(!brandName){ return showToast('Enter a name','error'); }
+          try {
+            // Prefer uploaded file if present
+            let logoToSave = brandLogo;
+            if(fileInput && fileInput.files && fileInput.files[0]){
+              const file = fileInput.files[0];
+              const reader = new FileReader();
+              const dataUrl = await new Promise((res,rej)=>{ reader.onload=()=>res(reader.result); reader.onerror=rej; reader.readAsDataURL(file); });
+              logoToSave = dataUrl;
+            }
+            await db.collection('users').doc(user.uid).set({ brandName, brandLogo: logoToSave }, { merge: true });
+            try { localStorage.setItem('brandName', brandName); localStorage.setItem('brandLogo', logoToSave || ''); } catch(_e) {}
+            // Update header immediately
+            const nameEl = document.querySelector('.brand h1');
+            if(nameEl) nameEl.textContent = brandName;
+            const avatarImg = document.querySelector('.avatar img');
+            if(avatarImg && (logoToSave || brandLogo)) avatarImg.src = logoToSave || brandLogo;
+            showToast('Brand updated');
+            document.getElementById('brandModal').style.display = 'none';
+          } catch(err){
+            showToast('Failed to save brand','error');
+          }
+        };
+      } catch(e){
+        showToast('Failed to load profile','error');
+      }
+    });
+  </script>
+</body>
+</html>
+
+
