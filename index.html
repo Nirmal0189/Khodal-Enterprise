@@ -738,8 +738,8 @@
     }
     
     .stat:hover {
-      transform: translateY(-4px);
-      box-shadow: var(--shadow-lg);
+      transform: translateY(-2px);
+      box-shadow: none;
       border-color: rgba(255, 255, 255, 0.2);
     }
     
@@ -830,9 +830,9 @@
     }
     
     .card:hover {
-      transform: translateY(-6px);
-      box-shadow: var(--shadow-lg);
-      border-color: rgba(6, 182, 212, 0.4);
+      transform: translateY(-2px);
+      box-shadow: none;
+      border-color: rgba(6, 182, 212, 0.3);
     }
     
     /* Mobile card optimizations */
@@ -1500,7 +1500,7 @@
     /* Enhanced hover effects */
     .btn:hover {
       transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+      box-shadow: none;
     }
     
     /* Glass morphism effects */
@@ -1512,11 +1512,11 @@
     
     /* Enhanced shadows */
     .shadow-lg {
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+      box-shadow: none;
     }
     
     .shadow-xl {
-      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+      box-shadow: none;
     }
     
     /* Custom scrollbar */
@@ -3070,55 +3070,9 @@
     .particle:nth-child(9) { left: 90%; animation-delay: 1.3s; }
     .particle:nth-child(10) { left: 95%; animation-delay: 1.8s; }
     
-    /* Enhanced cube animation with glow effect */
-    .reload-cube::before {
-      content: '';
-      position: absolute;
-      top: -10px;
-      left: -10px;
-      right: -10px;
-      bottom: -10px;
-      background: radial-gradient(circle, rgba(6, 182, 212, 0.2) 0%, transparent 70%);
-      border-radius: 50%;
-      animation: glowPulse 2s infinite ease-in-out;
-      z-index: -1;
-    }
+    /* Removed glow effects from reload cube */
     
-    /* Additional pulsing ring effect */
-    .reload-cube::after {
-      content: '';
-      position: absolute;
-      top: -20px;
-      left: -20px;
-      right: -20px;
-      bottom: -20px;
-      border: 2px solid rgba(6, 182, 212, 0.3);
-      border-radius: 50%;
-      animation: pulseRing 2s infinite ease-in-out;
-      z-index: -2;
-    }
-    
-    @keyframes pulseRing {
-      0% {
-        transform: scale(0.8);
-        opacity: 1;
-      }
-      100% {
-        transform: scale(1.2);
-        opacity: 0;
-      }
-    }
-    
-    @keyframes glowPulse {
-      0%, 100% { 
-        transform: scale(1);
-        opacity: 0.5;
-      }
-      50% { 
-        transform: scale(1.1);
-        opacity: 0.8;
-      }
-    }
+    /* Removed pulseRing and glowPulse keyframes (glow disabled) */
     
     /* Responsive design for reload animation */
     @media (max-width: 768px) {
@@ -3340,9 +3294,6 @@
       
       <div class="header-actions" style="display: flex; align-items: center; gap: 15px;">
         <span class="muted user-email-mobile" id="userEmail"></span>
-        <button class="btn" id="densityBtn" title="Toggle compact density">
-          <i class="fas fa-compress"></i>
-        </button>
         <button class="btn" id="profileBtn">
           <i class="fas fa-user"></i>
           
@@ -3446,6 +3397,14 @@
               <i class="fas fa-bolt"></i>
               <span>Quick Purchase</span>
             </button>
+            <button class="btn bad" id="returnBtn">
+              <i class="fas fa-undo"></i>
+              <span>Return Product</span>
+            </button>
+            <button class="btn" id="returnsPageBtn">
+              <i class="fas fa-clipboard-list"></i>
+              <span>Returns</span>
+            </button>
             <button class="btn" id="supplierBtn">
               <i class="fas fa-truck"></i>
               <span>Suppliers</span>
@@ -3467,12 +3426,24 @@
             <div class="v" id="statQty">0</div>
           </div>
           <div class="stat">
+            <h3><i class="fas fa-arrow-up"></i> Purchased Qty</h3>
+            <div class="v" id="statPurchasedQty">0</div>
+          </div>
+          <div class="stat">
+            <h3><i class="fas fa-arrow-down"></i> Returned Qty</h3>
+            <div class="v" id="statReturnedQty">0</div>
+          </div>
+          <div class="stat">
             <h3><i class="fas fa-calendar-alt"></i> Last Purchase</h3>
             <div class="v" id="statLast">–</div>
           </div>
           <div class="stat">
             <h3><i class="fas fa-truck"></i> Suppliers</h3>
             <div class="v" id="statSuppliers">0</div>
+          </div>
+          <div class="stat">
+            <h3><i class="fas fa-rupee-sign"></i> Total Rupees</h3>
+            <div class="v" id="statAmount">₹0.00</div>
           </div>
         </section>
 
@@ -3563,6 +3534,13 @@
                 <input id="f_unit" placeholder="pcs" value="pcs" class="form-input" />
               </div>
             </div>
+            <div class="form-row">
+              <div class="control">
+                <label for="f_price"><i class="fas fa-rupee-sign"></i> Price (₹)</label>
+                <input id="f_price" type="number" min="0" step="0.01" placeholder="0.00" class="form-input" />
+              </div>
+              <div class="control"></div>
+            </div>
             <div class="control">
               <label for="f_photo"><i class="fas fa-camera"></i> Photo</label>
               <input id="f_photo" type="file" accept="image/*" class="form-input" />
@@ -3628,6 +3606,13 @@
                 <input id="p_date" type="date" class="form-input" />
               </div>
             </div>
+            <div class="form-row">
+              <div class="control">
+                <label for="p_amount">Amount (₹)</label>
+                <input id="p_amount" type="number" min="0" step="0.01" placeholder="0.00" class="form-input" />
+              </div>
+              <div class="control"></div>
+            </div>
             <div class="control">
               <label for="p_note">Notes (Optional)</label>
               <textarea id="p_note" placeholder="Add any additional notes about this purchase..." class="form-textarea"></textarea>
@@ -3637,6 +3622,58 @@
           <div class="form-actions">
             <button class="btn brand" id="p_save">
               <i class="fas fa-check"></i> Add Purchase
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Return Product -->
+  <div class="modal-backdrop" id="returnModalWrap">
+    <div class="modal">
+      <header>
+        <strong><i class="fas fa-undo"></i> Return Product</strong>
+        <button class="btn" onclick="closeReturn()">
+          <i class="fas fa-times"></i> Close
+        </button>
+      </header>
+      <div class="body">
+        <div class="quick-purchase-form">
+          <div class="form-section">
+            <h4><i class="fas fa-cube"></i> Product Selection</h4>
+            <div class="control">
+              <label for="r_item">Choose Item</label>
+              <select id="r_item" class="form-select"></select>
+            </div>
+          </div>
+          <div class="form-section">
+            <h4><i class="fas fa-info-circle"></i> Return Details</h4>
+            <div class="form-row">
+              <div class="control">
+                <label for="r_qty">Quantity</label>
+                <input id="r_qty" type="number" min="1" value="1" class="form-input" />
+              </div>
+              <div class="control">
+                <label for="r_date">Return Date</label>
+                <input id="r_date" type="date" class="form-input" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="control">
+                <label for="r_amount">Amount (₹)</label>
+                <input id="r_amount" type="number" min="0" step="0.01" placeholder="0.00" class="form-input" />
+              </div>
+              <div class="control"></div>
+            </div>
+            <div class="control">
+              <label for="r_note">Notes (Optional)</label>
+              <textarea id="r_note" placeholder="Reason for return..." class="form-textarea"></textarea>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="btn bad" id="r_save">
+              <i class="fas fa-check"></i> Add Return
             </button>
           </div>
         </div>
@@ -3666,6 +3703,86 @@
           </div>
           <div id="supplierProductsList" class="supplier-products-grid">
             <!-- Products will be populated here -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Returns Page -->
+  <div class="modal-backdrop" id="returnsModalWrap">
+    <div class="modal">
+      <header>
+        <strong><i class="fas fa-clipboard-list"></i> Returns</strong>
+        <button class="btn" onclick="closeReturns()">
+          <i class="fas fa-times"></i> Close
+        </button>
+      </header>
+      <div class="body">
+        <div class="purchase-history-table">
+          <div class="purchase-header" style="display:grid;grid-template-columns: 1fr 80px 120px 1fr 120px; align-items:center;">
+            <div class="purchase-col">Date</div>
+            <div class="purchase-col">Qty</div>
+            <div class="purchase-col">Amount (₹)</div>
+            <div class="purchase-col">Notes</div>
+            <div class="purchase-col">Action</div>
+          </div>
+          <div id="returnsRows"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Edit Purchase -->
+  <div class="modal-backdrop" id="editPurchaseModalWrap">
+    <div class="modal">
+      <header>
+        <strong><i class="fas fa-edit"></i> Edit Purchase</strong>
+        <button class="btn" onclick="closeEditPurchase()">
+          <i class="fas fa-times"></i> Close
+        </button>
+      </header>
+      <div class="body">
+        <div class="quick-purchase-form">
+          <div class="form-section">
+            <h4><i class="fas fa-cube"></i> Product</h4>
+            <div class="form-row">
+              <div class="control">
+                <label for="ep_item">Choose Item</label>
+                <select id="ep_item" class="form-select"></select>
+              </div>
+              <div class="control">
+                <label>&nbsp;</label>
+                <button class="btn" id="ep_edit_item_btn"><i class="fas fa-pen"></i> Edit Item</button>
+              </div>
+            </div>
+          </div>
+          <div class="form-section">
+            <h4><i class="fas fa-info-circle"></i> Edit Details</h4>
+            <div class="form-row">
+              <div class="control">
+                <label for="ep_qty">Quantity</label>
+                <input id="ep_qty" type="number" min="1" value="1" class="form-input" />
+              </div>
+              <div class="control">
+                <label for="ep_date">Date</label>
+                <input id="ep_date" type="date" class="form-input" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="control">
+                <label for="ep_amount">Amount (₹)</label>
+                <input id="ep_amount" type="number" min="0" step="0.01" placeholder="0.00" class="form-input" />
+              </div>
+              <div class="control"></div>
+            </div>
+            <div class="control">
+              <label for="ep_note">Notes (Optional)</label>
+              <textarea id="ep_note" class="form-textarea"></textarea>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="btn brand" id="ep_save"><i class="fas fa-save"></i> Save Changes</button>
           </div>
         </div>
       </div>
@@ -3794,7 +3911,6 @@
     const registerErrorMessage = document.getElementById('registerErrorMessage');
     const logoutBtn = document.getElementById('logoutBtn');
     const userEmail = document.getElementById('userEmail');
-    const densityBtn = document.getElementById('densityBtn');
     
     // Show/hide functions for auth UI
     function showLogin() {
@@ -3814,11 +3930,6 @@
       registerPage.classList.add('hidden');
       app.classList.add('show');
       userEmail.textContent = auth.currentUser.email;
-      // Apply saved density preference
-      try {
-        const d = localStorage.getItem('density');
-        if (d === 'compact') document.body.classList.add('density-compact');
-      } catch(_e) {}
       
       // Initialize DOM elements if not already done
       if (!listEl) {
@@ -4212,9 +4323,9 @@
     }
     
     // Elements - will be initialized when DOM is ready
-    let listEl, tableWrap, tableBody, statProducts, statQty, statLast, statSuppliers, emptyState;
+    let listEl, tableWrap, tableBody, statProducts, statQty, statLast, statSuppliers, emptyState, statAmount, statPurchasedQty, statReturnedQty;
     let q, sortBy, viewMode;
-    let itemModalWrap, itemModalTitle, f_name, f_sku, f_supplier, f_category, f_openQty, f_unit, f_photo;
+    let itemModalWrap, itemModalTitle, f_name, f_sku, f_supplier, f_category, f_openQty, f_unit, f_price, f_photo;
     let detailModalWrap, detailTitle, detailBody;
     let purchaseModalWrap, p_item, p_qty, p_date, p_note;
     let supplierModalWrap;
@@ -4227,8 +4338,11 @@
       tableBody = document.getElementById('tableBody');
       statProducts = document.getElementById('statProducts');
       statQty = document.getElementById('statQty');
+      statPurchasedQty = document.getElementById('statPurchasedQty');
+      statReturnedQty = document.getElementById('statReturnedQty');
       statLast = document.getElementById('statLast');
       statSuppliers = document.getElementById('statSuppliers');
+      statAmount = document.getElementById('statAmount');
       emptyState = document.getElementById('emptyState');
 
       // Search & Sort
@@ -4245,6 +4359,7 @@
       f_category = document.getElementById('f_category');
       f_openQty = document.getElementById('f_openQty');
       f_unit = document.getElementById('f_unit');
+      f_price = document.getElementById('f_price');
       f_photo = document.getElementById('f_photo');
 
       detailModalWrap = document.getElementById('detailModalWrap');
@@ -4336,7 +4451,7 @@
     // Helpers
     function calcTotals(){
       // Check if DOM elements are ready
-      if (!statProducts || !statQty || !statLast || !statSuppliers) {
+      if (!statProducts || !statQty || !statPurchasedQty || !statReturnedQty || !statLast || !statSuppliers || !statAmount) {
         console.warn('⚠️ Stats elements not ready for calcTotals');
         return;
       }
@@ -4350,9 +4465,16 @@
       }
       items.forEach(i=> suppliers.add((i.supplier||'').trim()));
       statProducts.textContent = String(items.length);
-      statQty.textContent = [...pmap.values()].reduce((a,b)=>a+b,0);
+      const totalQty = [...pmap.values()].reduce((a,b)=>a+b,0);
+      const purchasedQty = state.purchases.filter(p=>Number(p.qty)>0).reduce((a,p)=>a+Number(p.qty||0),0);
+      const returnedQty = state.purchases.filter(p=>Number(p.qty)<0).reduce((a,p)=>a+Math.abs(Number(p.qty||0)),0);
+      statQty.textContent = totalQty;
+      statPurchasedQty.textContent = purchasedQty;
+      statReturnedQty.textContent = returnedQty;
       statLast.textContent = lastDate? fmtDate(lastDate) : '–';
       statSuppliers.textContent = [...suppliers].filter(Boolean).length;
+      const totalAmt = state.purchases.reduce((sum,p)=> sum + Number(p.amount||0), 0);
+      statAmount.textContent = `₹${Number(totalAmt).toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
     }
 
     function itemTotalQty(id){
@@ -4486,9 +4608,9 @@
       itemModalTitle.textContent = editId? ' Edit Item' : '<i class="fas fa-plus"></i> Add Item';
       if(editId){
         const i = state.items.find(x=>x.id===editId);
-        f_name.value=i.name||''; f_sku.value=i.sku||''; f_supplier.value=i.supplier||''; f_category.value=i.category||''; f_openQty.value=i.openQty||0; f_unit.value=i.unit||'pcs'; f_photo.value='';
+        f_name.value=i.name||''; f_sku.value=i.sku||''; f_supplier.value=i.supplier||''; f_category.value=i.category||''; f_openQty.value=i.openQty||0; f_unit.value=i.unit||'pcs'; f_price.value = Number(i.price||0); f_photo.value='';
       } else {
-        f_name.value=''; f_sku.value=''; f_supplier.value=''; f_category.value=''; f_openQty.value=0; f_unit.value='pcs'; f_photo.value='';
+        f_name.value=''; f_sku.value=''; f_supplier.value=''; f_category.value=''; f_openQty.value=0; f_unit.value='pcs'; f_price.value=''; f_photo.value='';
       }
       itemModalWrap.style.display='flex';
     }
@@ -4509,7 +4631,7 @@
     async function saveItem(addAnother=false){
       const name=f_name.value.trim(); if(!name){ showToast('Name is required', 'error'); return; }
       const item = editingId? state.items.find(x=>x.id===editingId) : {id:uid(), created:Date.now()};
-      item.name = name; item.sku=f_sku.value.trim(); item.supplier=f_supplier.value.trim(); item.category=f_category.value.trim(); item.unit=f_unit.value.trim()||'pcs';
+      item.name = name; item.sku=f_sku.value.trim(); item.supplier=f_supplier.value.trim(); item.category=f_category.value.trim(); item.unit=f_unit.value.trim()||'pcs'; item.price = Number(f_price && f_price.value ? f_price.value : 0);
       if(!editingId){ item.openQty=Number(f_openQty.value||0); }
       if(f_photo.files && f_photo.files[0]){
         const b64 = await fileToBase64(f_photo.files[0]);
@@ -4567,6 +4689,7 @@
              <div class="info-item"><i class="fas fa-truck"></i> Supplier: ${escapeHtml(i.supplier||'-')}</div>
              <div class="info-item"><i class="fas fa-folder"></i> Category: ${escapeHtml(i.category||'-')}</div>
              <div class="info-item"><i class="fas fa-balance-scale"></i> Unit: ${escapeHtml(i.unit||'pcs')}</div>
+             <div class="info-item"><i class="fas fa-rupee-sign"></i> Price: ₹${Number(i.price||0).toLocaleString('en-IN',{minimumFractionDigits:2, maximumFractionDigits:2})}</div>
              <div class="info-item"><i class="fas fa-layer-group"></i> Total Qty: ${qty}</div>
              <div class="detail-actions">
                <button class="btn brand" onclick="openPurchaseFor('${i.id}')"><i class="fas fa-cart-plus"></i> Add Purchase</button>
@@ -4579,17 +4702,20 @@
                <button class="btn bad" onclick="deleteAllPurchases('${i.id}')"><i class="fas fa-trash"></i> Clear History</button>
              </div>
              ${ps.length?`<div class="purchase-history-table">
-               <div class="purchase-header">
+               <div class="purchase-header" style="display:grid;grid-template-columns: 1fr 80px 120px 1fr 120px; align-items:center;">
                  <div class="purchase-col">Date</div>
                  <div class="purchase-col">Qty</div>
+                 <div class="purchase-col">Amount (₹)</div>
                  <div class="purchase-col">Notes</div>
                  <div class="purchase-col">Action</div>
                </div>
-               ${ps.map(p=>`<div class="purchase-row">
+               ${ps.map(p=>`<div class="purchase-row" style=\"display:grid;grid-template-columns: 1fr 80px 120px 1fr 120px; align-items:center;\">
                  <div class="purchase-col">${fmtDate(p.date)}</div>
                  <div class="purchase-col">${p.qty}</div>
+                 <div class="purchase-col">₹${Number(p.amount||0).toLocaleString('en-IN',{minimumFractionDigits:2, maximumFractionDigits:2})}</div>
                  <div class="purchase-col">${escapeHtml(p.note||'')}</div>
                  <div class="purchase-col">
+                   <button class="btn btn-sm" onclick="openEditPurchase('${p.id}')"><i class="fas fa-edit"></i></button>
                    <button class="btn bad btn-sm" onclick="deletePurchase('${p.id}')">
                      <i class="fas fa-trash"></i>
                    </button>
@@ -4637,11 +4763,44 @@
     function openPurchase(){
       p_item.innerHTML = state.items.map(i=>`<option value='${i.id}'>${escapeHtml(i.name)} (${escapeHtml(i.sku||'')})</option>`).join('');
       p_date.value = todayStr(); p_qty.value=1; p_note.value='';
+      const p_amount = document.getElementById('p_amount'); if(p_amount) p_amount.value='';
       purchaseModalWrap.style.display='flex';
     }
     
     function openPurchaseFor(itemId){ openPurchase(); p_item.value=itemId; }
     function closePurchase(){ purchaseModalWrap.style.display='none'; }
+    
+    // Return Modal
+    let returnModalWrap, r_item, r_qty, r_date, r_note;
+    function openReturn(){
+      if(!returnModalWrap){
+        returnModalWrap = document.getElementById('returnModalWrap');
+        r_item = document.getElementById('r_item');
+        r_qty = document.getElementById('r_qty');
+        r_date = document.getElementById('r_date');
+        r_note = document.getElementById('r_note');
+      }
+      if(!state.items.length){ showToast('No items available to return','warning'); return; }
+      r_item.innerHTML = state.items.map(i=>`<option value='${i.id}'>${escapeHtml(i.name)} (${escapeHtml(i.sku||'')})</option>`).join('');
+      r_date.value = todayStr(); r_qty.value=1; r_note.value='';
+      const r_amount = document.getElementById('r_amount'); if(r_amount) r_amount.value='';
+      returnModalWrap.style.display='flex';
+    }
+    function closeReturn(){ if(returnModalWrap) returnModalWrap.style.display='none'; }
+    async function addReturn(){
+      if(!r_item || !r_item.value){ showToast('Please choose an item', 'error'); return; }
+      const qtyNum = Number(r_qty.value||0);
+      if(qtyNum<=0){ showToast('Quantity must be greater than 0', 'error'); return; }
+      const amtEl = document.getElementById('r_amount');
+      const amountRaw = amtEl ? Number(amtEl.value||0) : 0;
+      if(amountRaw<0){ showToast('Amount cannot be negative', 'error'); return; }
+      const rec = { id:uid(), itemId:r_item.value, qty:-Math.abs(qtyNum), amount: -Math.abs(Number.isFinite(amountRaw)? amountRaw : 0), date: r_date.value||todayStr(), note: (r_note.value.trim()||'Return') };
+      const success = await savePurchaseToCloud(rec);
+      if(!success) return;
+      state.purchases.push(rec);
+      showToast('Return recorded');
+      render(); closeReturn();
+    }
     
     // Supplier Modal Functions
     function openSupplier(){
@@ -4734,10 +4893,43 @@
       supplierModalWrap.style.display='none';
     }
 
+    // Returns Page
+    let returnsModalWrap;
+    function openReturns(){
+      if(!returnsModalWrap){ returnsModalWrap = document.getElementById('returnsModalWrap'); }
+      const container = document.getElementById('returnsRows');
+      // Collect negative qty purchases
+      const returns = state.purchases.filter(p => Number(p.qty) < 0).sort((a,b)=> new Date(b.date)-new Date(a.date));
+      if(!returns.length){
+        container.innerHTML = `<div class='empty' style='margin:12px'><i class="fas fa-undo"></i> No returns found</div>`;
+      } else {
+        container.innerHTML = returns.map(p=>{
+          const item = state.items.find(i=>i.id===p.itemId);
+          const name = item ? item.name : '—';
+          return `
+            <div class="purchase-row">
+              <div class="purchase-col">${escapeHtml(name)}</div>
+              <div class="purchase-col">${Math.abs(Number(p.qty||0))}</div>
+              <div class="purchase-col">${fmtDate(p.date)}</div>
+              <div class="purchase-col">₹${Math.abs(Number(p.amount||0)).toLocaleString('en-IN',{minimumFractionDigits:2, maximumFractionDigits:2})}</div>
+              <div class="purchase-col">${escapeHtml(p.note||'')}</div>
+              <div class="purchase-col">
+                <button class="btn bad btn-sm" onclick="deletePurchase('${p.id}')"><i class="fas fa-trash"></i></button>
+              </div>
+            </div>`;
+        }).join('');
+      }
+      returnsModalWrap.style.display='flex';
+    }
+    function closeReturns(){ if(returnsModalWrap) returnsModalWrap.style.display='none'; }
+
     async function addPurchase(){
       if(!p_item.value){ showToast('Please choose an item', 'error'); return; }
-      const rec = { id:uid(), itemId:p_item.value, qty:Number(p_qty.value||0), date: p_date.value||todayStr(), note: p_note.value.trim() };
+      const amtEl = document.getElementById('p_amount');
+      const amount = amtEl ? Number(amtEl.value||0) : 0;
+      const rec = { id:uid(), itemId:p_item.value, qty:Number(p_qty.value||0), amount: Number.isFinite(amount)? amount : 0, date: p_date.value||todayStr(), note: p_note.value.trim() };
       if(rec.qty<=0){ showToast('Quantity must be greater than 0', 'error'); return; }
+      if(rec.amount<0){ showToast('Amount cannot be negative', 'error'); return; }
       
       const success = await savePurchaseToCloud(rec);
       if (!success) return;
@@ -4835,6 +5027,9 @@
     document.getElementById('supplierBtn').onclick = openSupplier;
     document.getElementById('p_save').onclick = addPurchase;
     document.getElementById('profileBtn').onclick = () => { window.location.href = 'profile.html'; };
+    document.getElementById('returnBtn').onclick = openReturn;
+    document.getElementById('r_save').onclick = addReturn;
+    document.getElementById('returnsPageBtn').onclick = openReturns;
 
     document.getElementById('importBtn').onclick = ()=> document.getElementById('importFile').click();
     document.getElementById('importFile').addEventListener('change', (e)=>{ const f = e.target.files[0]; if(f) importJSONFile(f); e.target.value=''; });
@@ -4845,13 +5040,6 @@
       const statsSection = document.getElementById('stats');
       statsSection.scrollIntoView({ behavior: 'smooth' });
     };
-    if (densityBtn) {
-      densityBtn.addEventListener('click', () => {
-        document.body.classList.toggle('density-compact');
-        const isCompact = document.body.classList.contains('density-compact');
-        try { localStorage.setItem('density', isCompact ? 'compact' : 'comfortable'); } catch(_e) {}
-      });
-    }
     
     // Reload button event listener
     const reloadBtn = document.getElementById('reloadBtn');
@@ -4975,7 +5163,7 @@
     }, 1000);
 
     // Close modals on backdrop click
-    [itemModalWrap, detailModalWrap, purchaseModalWrap, supplierModalWrap].forEach(el=> {
+    [itemModalWrap, detailModalWrap, purchaseModalWrap, supplierModalWrap, document.getElementById('returnModalWrap'), document.getElementById('returnsModalWrap')].forEach(el=> {
       if (el) {
         el.addEventListener('click', (e)=>{ 
           if(e.target===el){ 
@@ -5009,6 +5197,8 @@
     window.closeItemModal = closeItemModal;
     window.closePurchase = closePurchase;
     window.closeSupplier = closeSupplier;
+    window.closeReturn = closeReturn;
+    window.closeReturns = closeReturns;
     window.showSupplierProducts = showSupplierProducts;
     window.showSupplierList = showSupplierList;
     window.testSearchFunctionality = testSearchFunctionality;
@@ -5255,6 +5445,104 @@
         if(detailModalWrap && detailModalWrap.style.display==='flex') closeDetail();
         if(purchaseModalWrap && purchaseModalWrap.style.display==='flex') closePurchase();
         if(supplierModalWrap && supplierModalWrap.style.display==='flex') closeSupplier();
+      }
+    });
+
+    // Edit Purchase logic
+    let editPurchaseModalWrap, ep_item, ep_qty, ep_date, ep_amount, ep_note, editingPurchaseId = null;
+    function openEditPurchase(pid){
+      console.log('openEditPurchase called with:', pid);
+      if(!editPurchaseModalWrap){
+        editPurchaseModalWrap = document.getElementById('editPurchaseModalWrap');
+        ep_item = document.getElementById('ep_item');
+        ep_qty = document.getElementById('ep_qty');
+        ep_date = document.getElementById('ep_date');
+        ep_amount = document.getElementById('ep_amount');
+        ep_note = document.getElementById('ep_note');
+      }
+      if(!editPurchaseModalWrap){
+        console.error('Edit purchase modal not found');
+        showToast('Edit modal not found','error');
+        return;
+      }
+      const p = state.purchases.find(x=>x.id===pid);
+      if(!p){ showToast('Purchase not found','error'); return; }
+      editingPurchaseId = pid;
+      // Populate items selector
+      if(ep_item){
+        ep_item.innerHTML = state.items.map(i=>`<option value='${i.id}'>${escapeHtml(i.name)} (${escapeHtml(i.sku||'')})</option>`).join('');
+        ep_item.value = p.itemId;
+      }
+      ep_qty.value = Math.abs(Number(p.qty||0));
+      ep_date.value = p.date || todayStr();
+      ep_amount.value = Math.abs(Number(p.amount||0));
+      ep_note.value = p.note || '';
+      editPurchaseModalWrap.style.display='flex';
+      console.log('Edit purchase modal opened');
+    }
+    function closeEditPurchase(){ if(editPurchaseModalWrap){ editPurchaseModalWrap.style.display='none'; editingPurchaseId=null; } }
+    async function saveEditedPurchase(){
+      if(!editingPurchaseId) return;
+      const pOld = state.purchases.find(x=>x.id===editingPurchaseId);
+      if(!pOld) { showToast('Purchase not found','error'); return; }
+      const qtyNum = Number(ep_qty.value||0); if(qtyNum<=0){ showToast('Quantity must be greater than 0','error'); return; }
+      const amtNum = Number(ep_amount.value||0); if(amtNum<0){ showToast('Amount cannot be negative','error'); return; }
+      const updated = {
+        ...pOld,
+        itemId: ep_item && ep_item.value ? ep_item.value : pOld.itemId,
+        qty: pOld.qty<0 ? -Math.abs(qtyNum) : Math.abs(qtyNum),
+        amount: pOld.amount<0 ? -Math.abs(amtNum) : Math.abs(amtNum),
+        date: ep_date.value || todayStr(),
+        note: (ep_note.value||'')
+      };
+      const userId = auth.currentUser && auth.currentUser.uid;
+      try{
+        await db.collection('users').doc(userId).collection('purchases').doc(updated.id).set(updated);
+        state.purchases = state.purchases.map(x=> x.id===updated.id ? updated : x);
+        showToast('Purchase updated');
+        render();
+        closeEditPurchase();
+        const open = detailModalWrap && detailModalWrap.style.display==='flex';
+        if(open){ const id = (detailTitle.textContent && state.items.find(i=>i.name===detailTitle.textContent)?.id); if(id) openDetail(id); }
+      }catch(e){
+        showToast('Failed to update purchase','error');
+      }
+    }
+    window.openEditPurchase = openEditPurchase;
+    window.closeEditPurchase = closeEditPurchase;
+
+    // Bindings for edit purchase modal
+    const epSaveBtn = document.getElementById('ep_save'); if(epSaveBtn) epSaveBtn.onclick = saveEditedPurchase;
+    const epEditItemBtn = document.getElementById('ep_edit_item_btn'); if(epEditItemBtn) epEditItemBtn.onclick = ()=>{ if(ep_item && ep_item.value){ closeEditPurchase(); editItem(ep_item.value); } };
+
+    // Include backdrop close for edit modal as well
+    [document.getElementById('editPurchaseModalWrap')].forEach(el=> {
+      if (el) {
+        el.addEventListener('click', (e)=>{ if(e.target===el){ el.style.display='none'; } });
+      }
+    });
+
+    // Enhanced click handler for edit buttons
+    document.addEventListener('click', (e)=>{
+      const btn = e.target && (e.target.closest && e.target.closest('button'));
+      if(btn && btn.matches('.purchase-row .btn')){
+        const icon = btn.querySelector('i');
+        if(icon && icon.classList.contains('fa-edit')){
+          console.log('Edit button clicked');
+          const row = btn.closest('.purchase-row');
+          if(!row) return;
+          // Try to find purchase id from inline handler attribute
+          const onclickAttr = btn.getAttribute('onclick');
+          const idMatch = onclickAttr && onclickAttr.match(/openEditPurchase\('([^']+)'\)/);
+          if(idMatch && idMatch[1]){
+            console.log('Found purchase ID:', idMatch[1]);
+            openEditPurchase(idMatch[1]);
+            e.preventDefault();
+            e.stopPropagation();
+          } else {
+            console.error('Could not extract purchase ID from onclick');
+          }
+        }
       }
     });
   </script>
