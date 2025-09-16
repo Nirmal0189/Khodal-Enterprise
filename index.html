@@ -10,6 +10,9 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+  <!-- jsPDF for PDF export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
   <style>
     :root {
       --bg: #0a0f1a;
@@ -1967,6 +1970,17 @@
       justify-content: center;
     }
     
+    .purchase-note {
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      white-space: normal;
+      cursor: pointer;
+      word-break: break-word;
+    }
+    
     /* Mobile Responsive Improvements */
     @media (max-width: 768px) {
       .detail-layout {
@@ -3370,6 +3384,16 @@
                   </button>
                 </div>
               </div>
+              <div class="control" style="width:170px">
+                <label>
+                  <i class="fas fa-file-pdf"></i>
+                  Export PDF
+                </label>
+                <button class="btn" id="exportMonthPdfBtn">
+                  <i class="fas fa-file-pdf"></i>
+                  <span>Export Month PDF</span>
+                </button>
+              </div>
             </div>
             
             <div class="row wrap">
@@ -3805,6 +3829,21 @@
     </div>
   </div>
 
+  <!-- Modal: Full Note Viewer -->
+  <div class="modal-backdrop" id="noteModalWrap">
+    <div class="modal">
+      <header>
+        <strong><i class="fas fa-sticky-note"></i> Note</strong>
+        <button class="btn" onclick="closeNoteModal()">
+          <i class="fas fa-times"></i> Close
+        </button>
+      </header>
+      <div class="body">
+        <div id="noteModalContent" style="white-space: pre-wrap; word-break: break-word;"></div>
+      </div>
+    </div>
+  </div>
+  
   <input type="file" id="importFile" class="hidden" accept="application/json" />
   
   <div id="toast" class="toast">
@@ -4745,7 +4784,7 @@
                  <div class="purchase-col">${fmtDate(p.date)}</div>
                  <div class="purchase-col">${p.qty}</div>
                  <div class="purchase-col">₹${Number(p.amount||0).toLocaleString('en-IN',{minimumFractionDigits:2, maximumFractionDigits:2})}</div>
-                 <div class="purchase-col">${escapeHtml(p.note||'')}</div>
+                 <div class="purchase-col purchase-note" data-note="${encodeURIComponent(p.note||'')}">${escapeHtml(p.note||'')}</div>
                  <div class="purchase-col">
                    <button class="btn btn-sm" onclick="changePurchaseAmount('${p.id}')"><i class="fas fa-rupee-sign"></i></button>
                    <button class="btn bad btn-sm" onclick="deletePurchase('${p.id}')">
@@ -4968,7 +5007,7 @@
               <div class="purchase-col">${Math.abs(Number(p.qty||0))}</div>
               <div class="purchase-col">${fmtDate(p.date)}</div>
               <div class="purchase-col">₹${Math.abs(Number(p.amount||0)).toLocaleString('en-IN',{minimumFractionDigits:2, maximumFractionDigits:2})}</div>
-              <div class="purchase-col">${escapeHtml(p.note||'')}</div>
+              <div class="purchase-col purchase-note" data-note="${encodeURIComponent(p.note||'')}">${escapeHtml(p.note||'')}</div>
               <div class="purchase-col">
                 <button class="btn bad btn-sm" onclick="deletePurchase('${p.id}')"><i class="fas fa-trash"></i></button>
               </div>
@@ -5029,6 +5068,105 @@
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a'); a.href=url; a.download=`products-${sel}.csv`; a.click(); URL.revokeObjectURL(url);
       showToast('Month CSV exported');
+    }
+
+    async function exportMonthPDF(){
+      const sel = monthFilter && monthFilter.value;
+      if(!sel){ showToast('Select a month first','warning'); return; }
+      const itemsInMonth = state.items.filter(i => state.purchases.some(p => p.itemId===i.id && String(p.date||'').startsWith(sel)));
+      if(itemsInMonth.length===0){ showToast('No products for selected month','warning'); return; }
+
+      const { jsPDF } = window.jspdf || {};
+      if(!jsPDF || !window.jspdf || !window.jspdf.jsPDF){ showToast('PDF library not loaded','error'); return; }
+
+      const doc = new jsPDF('p','pt','a4');
+      const pageWidth = doc.internal.pageSize.getWidth();
+      let cursorY = 40;
+
+      async function getLogoDataUrl(){
+        const imgEl = document.getElementById('dashboardLogo');
+        if(!imgEl || !imgEl.src) return null;
+        try{
+          const res = await fetch(imgEl.src, { mode: 'cors' });
+          const blob = await res.blob();
+          return await new Promise((resolve,reject)=>{
+            const fr = new FileReader();
+            fr.onload = ()=> resolve(fr.result);
+            fr.onerror = reject;
+            fr.readAsDataURL(blob);
+          });
+        }catch(_e){ return null; }
+      }
+
+      try{
+        const logoDataUrl = await getLogoDataUrl();
+        if(logoDataUrl){
+          try{ doc.addImage(logoDataUrl, 'PNG', 40, cursorY, 40, 40); }catch(_e){}
+        }
+      }catch(_e){}
+
+      const brandName = (document.getElementById('dashboardName') && document.getElementById('dashboardName').textContent) || 'Khodal Enterprise';
+      doc.setFontSize(16); doc.setFont(undefined, 'bold');
+      doc.text(brandName, 90, cursorY + 18);
+      doc.setFontSize(11); doc.setFont(undefined, 'normal');
+      doc.text(`Month: ${sel}`, 90, cursorY + 50);
+
+      cursorY += 70;
+
+      const headers = [
+        { header: 'S.No', dataKey: 'sno' },
+        { header: 'Item Name', dataKey: 'name' },
+        { header: 'SKU', dataKey: 'sku' },
+        { header: 'Supplier', dataKey: 'supplier' },
+        { header: 'Unit', dataKey: 'unit' },
+        { header: 'Month Qty', dataKey: 'qty' },
+        { header: 'Amount', dataKey: 'amount' }
+      ];
+
+      const body = [];
+      let grandQty = 0; let grandAmt = 0;
+      itemsInMonth.forEach((i, idx)=>{
+        const ps = state.purchases.filter(p => p.itemId===i.id && String(p.date||'').startsWith(sel));
+        const mQty = ps.reduce((a,p)=> a + Number(p.qty||0), 0);
+        const mAmt = ps.reduce((a,p)=> a + Number(p.amount||0), 0);
+        grandQty += mQty; grandAmt += mAmt;
+        body.push({
+          sno: idx+1,
+          name: i.name || '',
+          sku: i.sku || '-',
+          supplier: i.supplier || '-',
+          unit: i.unit || 'pcs',
+          qty: String(mQty),
+          amount: `${Number(mAmt).toLocaleString('en-IN',{minimumFractionDigits:2, maximumFractionDigits:2})}`
+        });
+      });
+
+      if(doc.autoTable){
+        doc.autoTable({
+          startY: cursorY,
+          head: [headers.map(h=>h.header)],
+          body: body.map(row=> headers.map(h=> row[h.dataKey])),
+          styles: { fontSize: 9 },
+          headStyles: { fillColor: [6, 182, 212], textColor: 255 },
+          theme: 'striped',
+          didDrawPage: (data)=>{
+            const page = doc.internal.getNumberOfPages();
+            doc.setFontSize(9);
+            doc.text(String(page), pageWidth - 20, 20, { align: 'right' });
+          }
+        });
+        cursorY = doc.lastAutoTable.finalY + 16;
+      }
+
+      doc.setFontSize(12); doc.setFont(undefined,'bold');
+      doc.text('Totals', 40, cursorY);
+      doc.setFont(undefined,'normal');
+      doc.text(`Total Quantity: ${grandQty}`, 40, cursorY + 18);
+      doc.text(`Total Amount: ${Number(grandAmt).toLocaleString('en-IN',{minimumFractionDigits:2, maximumFractionDigits:2})}`, 40, cursorY + 36);
+
+      const fileName = `${brandName.replace(/\s+/g,'_').toLowerCase()}_bill_${sel}.pdf`;
+      doc.save(fileName);
+      showToast('Month PDF exported');
     }
     
     function importJSONFile(file){
@@ -5119,6 +5257,7 @@
     document.getElementById('importFile').addEventListener('change', (e)=>{ const f = e.target.files[0]; if(f) importJSONFile(f); e.target.value=''; });
     document.getElementById('exportBtn').onclick = exportJSON;
     document.getElementById('exportMonthBtn').onclick = exportMonthCSV;
+    document.getElementById('exportMonthPdfBtn').onclick = exportMonthPDF;
     document.getElementById('resetBtn').onclick = resetData;
     document.getElementById('bulkAddBtn').onclick = bulkAdd;
     document.getElementById('statsBtn').onclick = () => {
@@ -5636,6 +5775,31 @@
             console.error('Could not extract purchase ID from onclick');
           }
         }
+      }
+    });
+
+    // Note modal controls
+    const noteModalWrap = document.getElementById('noteModalWrap');
+    const noteModalContent = document.getElementById('noteModalContent');
+    function openNoteModal(noteText){
+      if(!noteModalWrap || !noteModalContent) return;
+      noteModalContent.textContent = noteText || '';
+      noteModalWrap.style.display = 'flex';
+    }
+    function closeNoteModal(){ if(noteModalWrap){ noteModalWrap.style.display='none'; } }
+    if(noteModalWrap){
+      noteModalWrap.addEventListener('click', (e)=>{ if(e.target===noteModalWrap){ noteModalWrap.style.display='none'; } });
+    }
+    window.closeNoteModal = closeNoteModal;
+
+    // Delegate click to show full notes
+    document.addEventListener('click', (e)=>{
+      const noteEl = e.target && (e.target.closest ? e.target.closest('.purchase-note') : null);
+      if(noteEl){
+        const raw = noteEl.getAttribute('data-note') || noteEl.textContent || '';
+        let full = raw;
+        try { full = decodeURIComponent(raw); } catch(_e) {}
+        openNoteModal(full.trim());
       }
     });
   </script>
