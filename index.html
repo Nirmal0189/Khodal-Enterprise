@@ -3358,6 +3358,18 @@
                   <option value="table">Table View</option>
                 </select>
               </div>
+              <div class="control" style="width:170px">
+                <label for="monthFilter">
+                  <i class="fas fa-calendar"></i>
+                  Month
+                </label>
+                <div style="position:relative">
+                  <input id="monthFilter" type="month" />
+                  <button id="clearMonthFilter" class="clear-search-btn" style="right:8px; top: 50%; transform: translateY(-50%); display:none; position:absolute;">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+              </div>
             </div>
             
             <div class="row wrap">
@@ -3372,6 +3384,10 @@
               <button class="btn" id="exportBtn">
                 <i class="fas fa-file-export"></i>
                 <span>Export</span>
+              </button>
+              <button class="btn" id="exportMonthBtn">
+                <i class="fas fa-file-csv"></i>
+                <span>Export Month</span>
               </button>
               <button class="btn warn" id="bulkAddBtn">
                 <i class="fas fa-copy"></i>
@@ -4324,7 +4340,7 @@
     
     // Elements - will be initialized when DOM is ready
     let listEl, tableWrap, tableBody, statProducts, statQty, statLast, statSuppliers, emptyState, statAmount, statPurchasedQty, statReturnedQty;
-    let q, sortBy, viewMode;
+    let q, sortBy, viewMode, monthFilter;
     let itemModalWrap, itemModalTitle, f_name, f_sku, f_supplier, f_category, f_openQty, f_unit, f_price, f_photo;
     let detailModalWrap, detailTitle, detailBody;
     let purchaseModalWrap, p_item, p_qty, p_date, p_note;
@@ -4349,6 +4365,7 @@
       q = document.getElementById('q');
       sortBy = document.getElementById('sortBy');
       viewMode = document.getElementById('viewMode');
+      monthFilter = document.getElementById('monthFilter');
 
       // Modals
       itemModalWrap = document.getElementById('itemModalWrap');
@@ -4503,6 +4520,7 @@
       // Show search status and clear button if there's a search term
       const searchStatus = document.getElementById('searchStatus');
       const clearSearchBtn = document.getElementById('clearSearch');
+      const clearMonthBtn = document.getElementById('clearMonthFilter');
       
       if (searchStatus) {
         if (term) {
@@ -4519,11 +4537,25 @@
           clearSearchBtn.style.display = 'none';
         }
       }
+      // Toggle clear for month filter
+      if (clearMonthBtn) {
+        if (monthFilter && monthFilter.value) {
+          clearMonthBtn.style.display = 'flex';
+        } else {
+          clearMonthBtn.style.display = 'none';
+        }
+      }
       
+      // Apply search filter first
       let items = state.items.filter(i=>{
         const blob = `${i.name} ${i.sku||''} ${i.supplier||''} ${i.category||''}`.toLowerCase();
         return blob.includes(term);
       });
+      // Apply month filter (matches any purchase in selected yyyy-mm)
+      const selectedMonth = monthFilter && monthFilter.value;
+      if (selectedMonth) {
+        items = items.filter(i => state.purchases.some(p => p.itemId === i.id && String(p.date||'').startsWith(selectedMonth)));
+      }
       console.log('📦 Items after filter:', items.length);
       const s = sortBy.value;
       items.sort((a,b)=>{
@@ -4715,7 +4747,7 @@
                  <div class="purchase-col">₹${Number(p.amount||0).toLocaleString('en-IN',{minimumFractionDigits:2, maximumFractionDigits:2})}</div>
                  <div class="purchase-col">${escapeHtml(p.note||'')}</div>
                  <div class="purchase-col">
-                   <button class="btn btn-sm" onclick="openEditPurchase('${p.id}')"><i class="fas fa-edit"></i></button>
+                   <button class="btn btn-sm" onclick="changePurchaseAmount('${p.id}')"><i class="fas fa-rupee-sign"></i></button>
                    <button class="btn bad btn-sm" onclick="deletePurchase('${p.id}')">
                      <i class="fas fa-trash"></i>
                    </button>
@@ -4758,6 +4790,30 @@
       render(); 
       openDetail(itemId);
     }
+
+    async function changePurchaseAmount(pid){
+      const p = state.purchases.find(x=>x.id===pid);
+      if(!p){ showToast('Purchase not found','error'); return; }
+      const current = Number(p.amount||0);
+      const input = prompt('Enter new amount (₹):', String(Math.abs(current)));
+      if(input===null) return; // cancelled
+      const val = Number(input.trim());
+      if(!Number.isFinite(val) || val < 0){ showToast('Invalid amount','error'); return; }
+      const userId = auth.currentUser && auth.currentUser.uid;
+      const updated = { ...p, amount: p.amount<0 ? -Math.abs(val) : Math.abs(val) };
+      try{
+        await db.collection('users').doc(userId).collection('purchases').doc(updated.id).set(updated);
+        state.purchases = state.purchases.map(x=> x.id===updated.id ? updated : x);
+        showToast('Amount updated');
+        render();
+        // refresh detail if open
+        const open = detailModalWrap && detailModalWrap.style.display==='flex';
+        if(open){ const id = (detailTitle.textContent && state.items.find(i=>i.name===detailTitle.textContent)?.id); if(id) openDetail(id); }
+      }catch(e){
+        showToast('Failed to update amount','error');
+      }
+    }
+    window.changePurchaseAmount = changePurchaseAmount;
 
     // Purchase Modal
     function openPurchase(){
@@ -4946,6 +5002,34 @@
       const a = document.createElement('a'); a.href=url; a.download='khodal-inventory.json'; a.click(); URL.revokeObjectURL(url);
       showToast('Data exported successfully');
     }
+    function exportMonthCSV(){
+      const sel = monthFilter && monthFilter.value;
+      if(!sel){ showToast('Select a month first','warning'); return; }
+      // Items that have purchases in this month
+      const itemsInMonth = state.items.filter(i => state.purchases.some(p => p.itemId===i.id && String(p.date||'').startsWith(sel)));
+      if(itemsInMonth.length===0){ showToast('No products for selected month','warning'); return; }
+      // Aggregate per item for the month
+      const rows = [];
+      rows.push(['Item Name','SKU','Supplier','Category','Unit','Month Qty','Month Amount (₹)','Last Purchase Date'].join(','));
+      itemsInMonth.forEach(i=>{
+        const ps = state.purchases.filter(p => p.itemId===i.id && String(p.date||'').startsWith(sel));
+        const mQty = ps.reduce((a,p)=> a + Number(p.qty||0), 0);
+        const mAmt = ps.reduce((a,p)=> a + Number(p.amount||0), 0);
+        const last = ps.length ? ps.sort((a,b)=> new Date(b.date)-new Date(a.date))[0].date : '';
+        const cells = [i.name, i.sku||'', i.supplier||'', i.category||'', i.unit||'', mQty, mAmt, last];
+        // Escape CSV
+        const esc = cells.map(v=> {
+          const s = String(v==null?'':v);
+          return /[",\n]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s;
+        });
+        rows.push(esc.join(','));
+      });
+      const csv = rows.join('\n');
+      const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href=url; a.download=`products-${sel}.csv`; a.click(); URL.revokeObjectURL(url);
+      showToast('Month CSV exported');
+    }
     
     function importJSONFile(file){
       const r = new FileReader();
@@ -5034,6 +5118,7 @@
     document.getElementById('importBtn').onclick = ()=> document.getElementById('importFile').click();
     document.getElementById('importFile').addEventListener('change', (e)=>{ const f = e.target.files[0]; if(f) importJSONFile(f); e.target.value=''; });
     document.getElementById('exportBtn').onclick = exportJSON;
+    document.getElementById('exportMonthBtn').onclick = exportMonthCSV;
     document.getElementById('resetBtn').onclick = resetData;
     document.getElementById('bulkAddBtn').onclick = bulkAdd;
     document.getElementById('statsBtn').onclick = () => {
@@ -5143,6 +5228,14 @@
       if (viewMode) {
         viewMode.removeEventListener('change', render);
         viewMode.addEventListener('change', render);
+      }
+      if (monthFilter) {
+        monthFilter.removeEventListener('change', render);
+        monthFilter.addEventListener('change', render);
+        const clearMonthBtn = document.getElementById('clearMonthFilter');
+        if (clearMonthBtn) {
+          clearMonthBtn.onclick = () => { monthFilter.value = ''; render(); };
+        }
       }
     }
     
